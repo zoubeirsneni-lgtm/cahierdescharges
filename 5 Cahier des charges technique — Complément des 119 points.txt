@@ -1,0 +1,1875 @@
+# BEBBA Healthy Food
+
+## Cahier des charges technique — Complément des 119 points
+
+**Slogan officiel : « Vos Plats santé en un clic »**
+
+---
+
+## STATUT DU DOCUMENT
+
+Ce document constitue le **complément technique et fonctionnel des 119 points** identifiés après l'analyse des cahiers des charges précédents de BEBBA Healthy Food.
+
+Il est complémentaire aux cahiers précédents.
+
+Il ne les remplace pas.
+
+Aucune règle déjà définie dans les documents précédents ne doit être supprimée ou modifiée implicitement par ce document.
+
+Lorsque le présent document précise une règle déjà existante, la présente formulation constitue la spécification détaillée de cette règle.
+
+Lorsqu'une valeur métier n'a pas encore été arrêtée, elle est explicitement identifiée comme **paramètre à définir avant implémentation**. Le développeur ne doit pas choisir lui-même cette valeur.
+
+---
+
+# A — RÈGLES MÉTIER GÉNÉRALES
+
+## 1. Horaires de fonctionnement
+
+Le système doit gérer les horaires de fonctionnement de BEBBA.
+
+Les horaires doivent être configurables par jour de la semaine.
+
+Ils doivent permettre de définir :
+
+* heure d'ouverture ;
+* heure de fermeture ;
+* périodes multiples dans une même journée ;
+* jours fermés ;
+* jours exceptionnellement ouverts ;
+* jours exceptionnellement fermés ;
+* périodes de fermeture exceptionnelle.
+
+Le système doit empêcher une commande lorsque la règle métier interdit les commandes hors horaires.
+
+Les horaires doivent être contrôlés côté serveur.
+
+Le fuseau horaire de référence doit être celui de BEBBA.
+
+**Valeur à fixer :** horaires exacts de fonctionnement et règles de prise de commande avant/après fermeture.
+
+---
+
+## 2. Zones de livraison
+
+Les zones de livraison doivent être définissables dans l'administration.
+
+Une zone peut comporter :
+
+* nom ;
+* description ;
+* statut actif/inactif ;
+* tarif de livraison ;
+* éventuel seuil de gratuité ;
+* délai indicatif ;
+* limites géographiques ;
+* ordre de priorité.
+
+Une adresse doit être associée à une zone déterminée.
+
+Une adresse située hors zone ne doit pas permettre une commande livrable.
+
+Le serveur doit effectuer la validation finale.
+
+**Valeurs à fixer :** liste initiale des zones et règles géographiques exactes.
+
+---
+
+## 3. Commande minimale
+
+Le système doit pouvoir imposer un montant minimum de commande.
+
+Le seuil doit être configurable.
+
+Le contrôle doit être effectué côté serveur.
+
+Le montant utilisé pour déterminer le seuil doit être explicitement défini : produits seuls ou total avant/après livraison/remises.
+
+Le client doit recevoir un message explicite lorsque le minimum n'est pas atteint.
+
+**Valeur à fixer :** montant minimum et base de calcul.
+
+---
+
+## 4. Délais
+
+Le système doit distinguer au minimum :
+
+* délai de préparation ;
+* délai de mise à disposition ;
+* délai de livraison ;
+* délai estimatif global.
+
+Les délais peuvent dépendre :
+
+* de la zone ;
+* de l'heure ;
+* du volume de commandes ;
+* du produit ;
+* de la disponibilité des livreurs.
+
+Un délai affiché au client doit être identifié comme estimation lorsqu'il ne constitue pas une garantie.
+
+Les heures de début et de fin pertinentes doivent être enregistrées.
+
+**Valeurs à fixer :** délais standards et règles de calcul.
+
+---
+
+## 5. Priorité des commandes
+
+Le système doit définir l'ordre de traitement des commandes.
+
+Les critères possibles doivent être explicitement configurés et non laissés à l'interprétation du développeur.
+
+Le KDS doit afficher un ordre déterministe.
+
+Une priorité exceptionnelle doit être :
+
+* autorisée uniquement aux rôles habilités ;
+* enregistrée dans l'historique ;
+* associée à un motif.
+
+Une modification de priorité ne doit pas supprimer l'ordre historique.
+
+---
+
+# B — CATALOGUE ET PRODUITS
+
+## 6. Cycle de vie complet d'un produit
+
+Un produit doit disposer d'un cycle de vie explicite :
+
+* brouillon ;
+* actif ;
+* temporairement indisponible ;
+* désactivé ;
+* archivé.
+
+Chaque transition doit être contrôlée.
+
+Un produit archivé ne doit pas être proposé à la vente.
+
+Les anciennes commandes doivent conserver le produit historique.
+
+---
+
+## 7. Prix des produits
+
+Le prix doit être :
+
+* numérique ;
+* positif ou nul uniquement si autorisé ;
+* exprimé dans la devise BEBBA ;
+* stocké avec une précision monétaire définie ;
+* contrôlé côté serveur.
+
+Une commande doit conserver le prix réellement appliqué au moment de sa création.
+
+Une modification ultérieure du prix catalogue ne doit pas modifier les anciennes commandes.
+
+Toute modification administrative du prix doit être historisable.
+
+---
+
+## 8. Prix des options
+
+Chaque option payante doit posséder son propre prix.
+
+Le prix d'une option doit être enregistré dans la ligne de commande au moment de la commande.
+
+Les modifications ultérieures du prix de l'option ne doivent pas modifier les anciennes commandes.
+
+Une option gratuite doit être explicitement distinguée d'une option dont le prix est nul par promotion.
+
+---
+
+## 9. Versionnement des recettes
+
+Une recette doit être versionnée.
+
+Une version doit conserver :
+
+* identifiant ;
+* date de création ;
+* date d'activation ;
+* date de désactivation éventuelle ;
+* ingrédients ;
+* quantités ;
+* unités ;
+* auteur ;
+* historique de modification.
+
+Une commande doit permettre de retrouver la recette/version utilisée pour calculer la consommation applicable.
+
+Une modification de recette ne doit pas réécrire silencieusement l'historique.
+
+---
+
+## 10. Composition exacte d'une commande
+
+Une commande doit figer :
+
+* produit ;
+* quantité ;
+* prix unitaire ;
+* options ;
+* prix des options ;
+* sous-total ;
+* remise éventuelle ;
+* frais de livraison ;
+* total ;
+* recette/version lorsque nécessaire ;
+* données utiles à la traçabilité.
+
+L'affichage actuel du catalogue ne doit pas être utilisé pour reconstruire rétroactivement une ancienne commande.
+
+---
+
+# C — ALIMENTATION ET NUTRITION
+
+## 11. Informations alimentaires
+
+Les produits doivent pouvoir comporter les informations alimentaires prévues par BEBBA.
+
+Selon les informations effectivement proposées, cela peut inclure :
+
+* calories ;
+* protéines ;
+* glucides ;
+* lipides ;
+* fibres ;
+* portions ;
+* informations nutritionnelles complémentaires.
+
+Les valeurs affichées doivent correspondre à une source ou version identifiée.
+
+Une information inconnue ne doit pas être inventée.
+
+---
+
+## 12. Allergènes
+
+Les allergènes doivent être associés aux produits et, lorsque nécessaire, aux ingrédients.
+
+Le système doit permettre leur affichage au client.
+
+La modification d'une recette doit permettre de recalculer les allergènes applicables.
+
+Les informations doivent être historisées avec la recette lorsqu'elles influencent une commande historique.
+
+---
+
+## 13. Personnalisation alimentaire
+
+Les personnalisations doivent être définies dans le catalogue.
+
+Le système doit distinguer :
+
+* personnalisation autorisée ;
+* personnalisation interdite ;
+* supplément payant ;
+* supplément gratuit ;
+* modification sans impact tarifaire.
+
+Une personnalisation ne doit pas permettre au client de modifier librement une recette non prévue par le système.
+
+---
+
+# D — PANIER ET COMMANDES
+
+## 14. Quantités maximales
+
+Le système doit pouvoir définir une quantité maximale :
+
+* par produit ;
+* par option ;
+* par ligne ;
+* par commande.
+
+Le contrôle doit être réalisé côté serveur.
+
+Le client doit être informé lorsqu'une quantité maximale est atteinte.
+
+---
+
+## 15. Modification d'une commande
+
+Le système doit définir précisément jusqu'à quel état une commande peut être modifiée.
+
+Une modification autorisée doit recalculer :
+
+* contenu ;
+* prix ;
+* options ;
+* promotions ;
+* livraison ;
+* total ;
+* consommation prévisionnelle.
+
+Toute modification doit être historisée lorsque la commande est déjà créée.
+
+---
+
+## 16. Modification après début de préparation
+
+Après le début de préparation, une modification ne doit pas être autorisée automatiquement.
+
+Si une exception est prévue, elle doit :
+
+* être limitée aux rôles autorisés ;
+* vérifier l'état réel ;
+* recalculer les conséquences ;
+* gérer le stock ;
+* conserver l'historique ;
+* enregistrer l'auteur et le motif.
+
+---
+
+## 17. Duplication / recommander
+
+Un client connecté doit pouvoir, si cette fonction est activée, reprendre une ancienne commande pour créer un nouveau panier.
+
+La duplication doit revalider :
+
+* disponibilité ;
+* prix ;
+* options ;
+* promotions ;
+* recettes ;
+* frais de livraison.
+
+Elle ne doit jamais créer directement une nouvelle commande sans validation du client.
+
+---
+
+## 18. Commande abandonnée
+
+Le système doit pouvoir identifier les paniers commencés mais non transformés en commandes.
+
+Une commande jamais créée ne doit pas apparaître comme une commande réelle.
+
+Les données de panier abandonné doivent respecter la politique de conservation définie.
+
+---
+
+# E — FINANCES ET TOTAL
+
+## 19. Précision monétaire
+
+Tous les montants monétaires doivent utiliser une représentation précise et déterministe.
+
+Les calculs ne doivent pas dépendre d'arrondis flottants non contrôlés.
+
+La précision utilisée doit être identique entre :
+
+* frontend ;
+* backend ;
+* base de données ;
+* exports ;
+* statistiques.
+
+---
+
+## 20. Décomposition du total
+
+Le système doit distinguer au minimum :
+
+* total brut produits ;
+* total options ;
+* remise ;
+* sous-total après remise ;
+* frais de livraison ;
+* total final ;
+* montant encaissé ;
+* reste à encaisser.
+
+Chaque composant doit être identifiable.
+
+---
+
+## 21. Remises
+
+Une remise doit posséder :
+
+* type ;
+* valeur ;
+* condition ;
+* montant effectivement appliqué ;
+* référence de la règle.
+
+Le montant réellement appliqué doit être conservé dans la commande.
+
+---
+
+## 22. Cumul des promotions
+
+Le système doit explicitement définir si plusieurs promotions peuvent être cumulées.
+
+Les règles doivent déterminer :
+
+* promotions compatibles ;
+* promotions incompatibles ;
+* ordre d'application ;
+* plafond ;
+* priorité.
+
+Aucune combinaison implicite ne doit être inventée par le développeur.
+
+---
+
+## 23. Devise
+
+La devise officielle de BEBBA doit être unique pour V1.
+
+Tous les montants doivent être affichés avec cette devise.
+
+Les commandes historiques doivent conserver leur devise.
+
+**Valeur à confirmer dans la configuration métier :** devise officielle et format d'affichage.
+
+---
+
+# F — ENCAISSEMENT ET RÉCONCILIATION
+
+## 24. Réconciliation financière
+
+Le système doit permettre de rapprocher :
+
+* commandes livrées ;
+* commandes encaissées ;
+* commandes restant à encaisser ;
+* montants encaissés ;
+* écarts.
+
+Une différence doit être identifiable.
+
+Les corrections doivent être historisées.
+
+---
+
+## 25. Clôture de caisse
+
+Le système doit permettre une clôture de caisse ou de collecte lorsque cette fonction est activée.
+
+Une clôture doit contenir :
+
+* période ;
+* utilisateur ;
+* montant attendu ;
+* montant déclaré ;
+* écart ;
+* justification ;
+* date ;
+* statut.
+
+Une clôture validée ne doit pas être silencieusement modifiable.
+
+---
+
+## 26. Encaissement après livraison
+
+Une commande peut rester :
+
+`delivered + to_collect`.
+
+Un encaissement ultérieur doit :
+
+* conserver la date réelle d'encaissement ;
+* conserver l'auteur ;
+* conserver le montant ;
+* passer à `paid` uniquement lorsque les conditions sont satisfaites.
+
+La date de livraison et la date d'encaissement sont deux informations différentes.
+
+---
+
+# G — KDS / CUISINE
+
+## 27. File de préparation
+
+Le KDS doit disposer d'une file de commandes déterministe.
+
+La file doit afficher au minimum :
+
+* numéro de commande ;
+* heure ;
+* priorité ;
+* état ;
+* contenu ;
+* informations nécessaires à la préparation.
+
+Les commandes doivent apparaître et disparaître selon les transitions autorisées.
+
+---
+
+## 28. Temps de préparation
+
+Le système doit conserver les timestamps pertinents :
+
+* réception ;
+* début préparation ;
+* prêt ;
+* remise au livreur si applicable.
+
+Les statistiques de préparation doivent utiliser ces timestamps.
+
+---
+
+## 29. Annulation côté cuisine
+
+La cuisine ne doit pouvoir annuler une commande que si son rôle l'autorise.
+
+L'annulation doit :
+
+* vérifier l'état ;
+* gérer le stock ;
+* enregistrer le motif ;
+* enregistrer l'auteur ;
+* déclencher les notifications nécessaires.
+
+---
+
+## 30. Rupture pendant préparation
+
+Si un ingrédient devient indisponible pendant une préparation :
+
+* l'incident doit être signalé ;
+* la commande doit recevoir un état cohérent ;
+* aucune consommation supplémentaire ne doit être enregistrée sans validation ;
+* l'administration doit être informée lorsque nécessaire.
+
+---
+
+# H — STOCK
+
+## 31. Unités et conversions
+
+Chaque ingrédient doit disposer d'une unité de stock définie.
+
+Les recettes peuvent utiliser des unités différentes uniquement lorsqu'une conversion explicite existe.
+
+Les conversions doivent être centralisées et déterministes.
+
+Exemple :
+
+kg ↔ g
+
+L'application ne doit jamais effectuer une conversion implicite non définie.
+
+---
+
+## 32. Pertes et gaspillage
+
+Le stock doit pouvoir enregistrer des sorties non liées à une commande :
+
+* perte ;
+* gaspillage ;
+* produit détérioré ;
+* erreur ;
+* casse ;
+* expiration ;
+* autre motif autorisé.
+
+Chaque mouvement doit conserver :
+
+* ingrédient ;
+* quantité ;
+* unité ;
+* motif ;
+* auteur ;
+* date.
+
+---
+
+## 33. Inventaire physique
+
+L'administration doit pouvoir effectuer un inventaire physique.
+
+Le système doit comparer :
+
+* stock théorique ;
+* stock réel ;
+* écart.
+
+Une régularisation doit créer un mouvement d'inventaire.
+
+L'ancienne valeur ne doit pas être effacée de l'historique.
+
+---
+
+## 34. Seuils de stock
+
+Chaque ingrédient peut disposer de :
+
+* seuil d'alerte ;
+* seuil critique ;
+* quantité minimale ;
+* quantité cible.
+
+Les alertes doivent être basées sur les valeurs réellement définies.
+
+Les noms de champs doivent être cohérents dans toute l'application.
+
+---
+
+## 35. Stock réservé
+
+Si le système réserve du stock avant consommation effective, la réservation doit être distinguée du stock physiquement disponible.
+
+Le système doit pouvoir déterminer :
+
+* stock physique ;
+* stock réservé ;
+* stock disponible ;
+* stock consommé.
+
+Une réservation annulée doit être libérée.
+
+Une double réservation ne doit pas être possible pour la même commande.
+
+---
+
+## 36. Concurrence sur le stock
+
+Deux commandes simultanées ne doivent pas pouvoir consommer la même quantité disponible lorsque celle-ci est insuffisante.
+
+Les opérations critiques doivent être atomiques ou utiliser un mécanisme équivalent garantissant la cohérence.
+
+Les erreurs de concurrence doivent être gérées explicitement.
+
+---
+
+# I — FOURNISSEURS
+
+## 37. Commandes fournisseurs
+
+Le système doit pouvoir gérer les commandes fournisseurs si cette fonction est activée.
+
+Une commande fournisseur doit comporter :
+
+* fournisseur ;
+* lignes ;
+* quantités ;
+* prix ;
+* statut ;
+* date ;
+* référence ;
+* historique.
+
+---
+
+## 38. Réception fournisseur
+
+Une réception doit permettre d'enregistrer :
+
+* quantité commandée ;
+* quantité reçue ;
+* quantité manquante ;
+* quantité refusée ;
+* date ;
+* utilisateur ;
+* éventuel lot ;
+* éventuelle date d'expiration.
+
+La réception doit mettre à jour le stock selon les règles définies.
+
+---
+
+## 39. Prix d'achat
+
+Le système doit conserver l'historique des prix d'achat.
+
+Une modification de prix ne doit pas écraser les anciennes valeurs utilisées dans les analyses historiques.
+
+Les coûts doivent pouvoir être reliés à une date et à un fournisseur lorsque nécessaire.
+
+---
+
+## 40. Lots et péremption
+
+Les ingrédients pouvant nécessiter une traçabilité par lot doivent pouvoir conserver :
+
+* numéro de lot ;
+* date de réception ;
+* date de péremption ;
+* fournisseur ;
+* quantité.
+
+Les produits expirés ne doivent pas être utilisés lorsque les règles métier l'interdisent.
+
+---
+
+# J — LIVREURS
+
+## 41. Disponibilité
+
+Un livreur doit disposer d'un état de disponibilité.
+
+Exemples :
+
+* disponible ;
+* indisponible ;
+* en livraison ;
+* suspendu ;
+* désactivé.
+
+Un livreur désactivé ne doit pas recevoir de nouvelle affectation.
+
+---
+
+## 42. Affectation
+
+L'affectation d'une commande doit :
+
+* être autorisée ;
+* enregistrer le livreur ;
+* enregistrer l'auteur ;
+* enregistrer la date ;
+* conserver l'historique.
+
+Une réaffectation doit conserver l'ancienne affectation.
+
+---
+
+## 43. Refus de livraison
+
+Le système doit prévoir un comportement pour le refus d'une livraison.
+
+Le refus doit :
+
+* être réservé au rôle autorisé ;
+* comporter un motif ;
+* modifier l'état selon la matrice prévue ;
+* permettre une nouvelle affectation si nécessaire ;
+* être historisé.
+
+---
+
+## 44. Échec de livraison
+
+Une livraison échouée doit être distinguée d'une livraison réussie.
+
+Le système doit conserver :
+
+* motif ;
+* date ;
+* livreur ;
+* tentative ;
+* commentaire éventuel ;
+* état suivant.
+
+---
+
+## 45. Deuxième tentative
+
+Une deuxième tentative doit avoir son propre événement.
+
+Le système doit conserver le nombre de tentatives.
+
+Une nouvelle tentative doit respecter les règles d'affectation et de disponibilité.
+
+Le passage en échec définitif doit être explicite.
+
+---
+
+# K — GPS
+
+## 46. Fréquence GPS
+
+La fréquence de collecte doit être configurable.
+
+Elle doit tenir compte :
+
+* consommation batterie ;
+* précision ;
+* charge serveur ;
+* utilité opérationnelle.
+
+Le système ne doit pas collecter une position plus fréquemment que nécessaire.
+
+**Valeur à fixer :** intervalle nominal et règles d'exception.
+
+---
+
+## 47. Position affichée
+
+L'accès à la position doit être limité aux rôles autorisés.
+
+La position affichée doit indiquer sa fraîcheur lorsque cela est pertinent.
+
+Une position ancienne ne doit pas être présentée comme une position actuelle.
+
+---
+
+## 48. Fin du suivi
+
+Le suivi GPS doit s'arrêter lorsque l'événement métier le justifie.
+
+Le système doit définir précisément le moment d'arrêt.
+
+Aucune collecte permanente ne doit être effectuée sans justification métier.
+
+---
+
+## 49. Confidentialité GPS
+
+Les positions GPS doivent être considérées comme des données sensibles du système.
+
+L'accès doit être contrôlé.
+
+Les positions ne doivent pas être exposées publiquement.
+
+---
+
+## 50. Historique GPS
+
+Si l'historique est conservé, chaque point doit comporter au minimum :
+
+* date/heure ;
+* latitude ;
+* longitude ;
+* précision lorsque disponible ;
+* livreur ;
+* commande ou contexte.
+
+La durée de conservation doit être définie.
+
+---
+
+# L — RÉCLAMATIONS
+
+## 51. Motifs exhaustifs
+
+Les motifs de réclamation doivent être administrables ou explicitement définis.
+
+Ils doivent couvrir au minimum les catégories nécessaires à BEBBA, notamment :
+
+* commande incorrecte ;
+* produit manquant ;
+* produit différent ;
+* problème de qualité ;
+* problème de livraison ;
+* problème d'encaissement ;
+* autre.
+
+Le motif choisi doit être enregistré.
+
+---
+
+## 52. Résolutions
+
+Une réclamation doit pouvoir recevoir une résolution définie.
+
+Exemples de types à prévoir :
+
+* information ;
+* correction ;
+* remplacement ;
+* avoir ;
+* remboursement ;
+* refus motivé ;
+* autre résolution autorisée.
+
+La résolution doit être historisée.
+
+---
+
+## 53. Autorisation de remboursement
+
+Le remboursement doit être soumis aux permissions appropriées.
+
+Le système doit distinguer :
+
+* demande de remboursement ;
+* autorisation ;
+* exécution ;
+* clôture.
+
+L'auteur de chaque étape doit être conservé.
+
+---
+
+## 54. Photos
+
+Les photos liées à une réclamation doivent être :
+
+* contrôlées ;
+* sécurisées ;
+* liées à la réclamation ;
+* horodatées ;
+* accessibles uniquement aux personnes autorisées.
+
+La suppression doit être historisée lorsque nécessaire.
+
+---
+
+## 55. Chat
+
+Le chat d'une réclamation doit conserver :
+
+* auteur ;
+* message ;
+* date/heure ;
+* statut ;
+* pièces jointes éventuelles.
+
+Un message déjà envoyé ne doit pas pouvoir être modifié silencieusement.
+
+---
+
+# M — NOTIFICATIONS
+
+## 56. Préférences par événement
+
+Les préférences de notification doivent pouvoir distinguer les événements.
+
+Le système doit respecter les préférences lorsqu'elles sont applicables.
+
+Les notifications indispensables au fonctionnement de la commande doivent être distinguées des notifications promotionnelles.
+
+---
+
+## 57. Échec de notification
+
+Un échec d'envoi doit être enregistré.
+
+Le système doit pouvoir conserver :
+
+* canal ;
+* date ;
+* motif ;
+* nombre de tentatives ;
+* dernier état.
+
+Une nouvelle tentative ne doit pas générer une duplication incontrôlée.
+
+---
+
+# N — AUTHENTIFICATION ET UTILISATEURS
+
+## 58. Réinitialisation du mot de passe
+
+La réinitialisation doit :
+
+* vérifier l'identité selon le mécanisme prévu ;
+* utiliser un mécanisme temporaire ;
+* expirer ;
+* ne jamais exposer l'ancien mot de passe ;
+* invalider les mécanismes précédents lorsque nécessaire.
+
+---
+
+## 59. Expiration des sessions
+
+Les sessions doivent avoir une durée de validité définie.
+
+Une session expirée doit être refusée côté serveur.
+
+Le frontend doit rediriger vers l'authentification sans conserver un faux état connecté.
+
+---
+
+## 60. Sessions multiples
+
+Le système doit définir si plusieurs sessions simultanées sont autorisées.
+
+Lorsque plusieurs sessions sont autorisées, elles doivent être identifiables techniquement.
+
+Les sessions sensibles doivent pouvoir être invalidées.
+
+---
+
+## 61. Déconnexion globale
+
+Une fonctionnalité de déconnexion globale doit pouvoir invalider les sessions actives d'un compte lorsque cette fonction est nécessaire.
+
+Elle doit être journalisée pour les comptes sensibles.
+
+---
+
+## 62. Protection contre les attaques
+
+Les mécanismes d'authentification doivent être protégés contre notamment :
+
+* brute force ;
+* credential stuffing ;
+* répétition de requêtes ;
+* abus des endpoints ;
+* enumeration lorsque possible.
+
+Les tentatives doivent être limitées et journalisées sans exposer les secrets.
+
+---
+
+## 63. Authentification renforcée du Super Admin
+
+L'accès Super Admin doit bénéficier du niveau de protection approprié au caractère critique des opérations.
+
+Le mécanisme exact doit être défini avant production.
+
+Toute opération sensible doit vérifier l'autorisation côté serveur.
+
+---
+
+# O — SÉCURITÉ WEB
+
+## 64. CORS
+
+Les origines autorisées doivent être explicitement configurées.
+
+Le serveur ne doit pas utiliser une politique permissive injustifiée en production.
+
+---
+
+## 65. CSRF
+
+Les mécanismes de session et d'authentification doivent être analysés afin d'empêcher les requêtes forgées.
+
+La protection adaptée au mécanisme d'authentification doit être mise en œuvre.
+
+---
+
+## 66. XSS
+
+Toutes les données contrôlées par l'utilisateur doivent être considérées comme non fiables.
+
+Les affichages doivent empêcher l'exécution de contenu injecté.
+
+Les contenus HTML doivent être nettoyés ou interdits lorsque non nécessaires.
+
+---
+
+## 67. Injection
+
+Les requêtes doivent utiliser des mécanismes paramétrés.
+
+Les entrées utilisateur ne doivent pas être concaténées directement dans des requêtes sensibles.
+
+La validation doit être effectuée côté serveur.
+
+---
+
+## 68. Upload
+
+Les uploads doivent être protégés contre :
+
+* fichiers trop volumineux ;
+* types interdits ;
+* extensions trompeuses ;
+* noms dangereux ;
+* contenu malveillant ;
+* accès non autorisé.
+
+---
+
+## 69. Secrets
+
+Ne doivent jamais être exposés dans :
+
+* frontend ;
+* Git ;
+* logs ;
+* réponses API ;
+* fichiers publics.
+
+Les secrets doivent être gérés par le mécanisme de configuration sécurisé de l'environnement.
+
+---
+
+# P — BASE DE DONNÉES
+
+## 70. Schéma définitif
+
+Le schéma final doit être documenté.
+
+Chaque entité doit disposer de :
+
+* nom ;
+* identifiant ;
+* champs ;
+* types ;
+* contraintes ;
+* valeurs autorisées ;
+* relations ;
+* index nécessaires.
+
+Aucune structure critique ne doit dépendre d'un champ improvisé dans le frontend.
+
+---
+
+## 71. Relations
+
+Les relations entre :
+
+* clients ;
+* commandes ;
+* lignes ;
+* produits ;
+* options ;
+* recettes ;
+* ingrédients ;
+* mouvements ;
+* fournisseurs ;
+* livreurs ;
+* réclamations ;
+* messages ;
+
+doivent être définies explicitement.
+
+Les suppressions doivent respecter l'intégrité des historiques.
+
+---
+
+## 72. Identifiants
+
+Chaque entité doit utiliser une stratégie d'identifiant cohérente.
+
+Les identifiants doivent être :
+
+* uniques ;
+* stables ;
+* non réutilisés lorsque l'historique l'interdit.
+
+Les identifiants métier et techniques doivent être distingués lorsqu'ils ont des fonctions différentes.
+
+---
+
+# Q — API
+
+## 73. Contrat API définitif
+
+Chaque endpoint doit documenter :
+
+* méthode ;
+* URL ;
+* authentification ;
+* rôle ;
+* paramètres ;
+* corps ;
+* réponse ;
+* erreurs ;
+* codes HTTP ;
+* idempotence éventuelle.
+
+---
+
+## 74. Versionnement API
+
+L'API doit posséder une stratégie de versionnement.
+
+Une évolution incompatible ne doit pas casser silencieusement les clients existants.
+
+---
+
+## 75. Pagination
+
+Les endpoints retournant des listes importantes doivent utiliser la pagination.
+
+La taille maximale de page doit être contrôlée.
+
+---
+
+## 76. Tri
+
+Les champs triables doivent être explicitement autorisés.
+
+Un utilisateur ne doit pas pouvoir injecter arbitrairement un champ de tri.
+
+---
+
+## 77. Filtres
+
+Les filtres disponibles doivent être documentés.
+
+Les valeurs doivent être validées.
+
+Les filtres ne doivent pas permettre d'accéder à des données auxquelles l'utilisateur n'a pas droit.
+
+---
+
+## 78. Limites
+
+L'API doit définir :
+
+* taille maximale des requêtes ;
+* taille maximale des réponses si nécessaire ;
+* nombre maximal d'éléments ;
+* timeout ;
+* rate limit.
+
+---
+
+# R — TEMPS RÉEL
+
+## 79. Architecture temps réel
+
+Les fonctionnalités nécessitant une mise à jour temps réel doivent être identifiées.
+
+Cela peut concerner :
+
+* KDS ;
+* commandes ;
+* affectation ;
+* suivi ;
+* notifications ;
+* chat ;
+* stock.
+
+Le mécanisme retenu doit être documenté.
+
+---
+
+## 80. Conflits temps réel
+
+Lorsqu'une donnée est modifiée simultanément par plusieurs acteurs :
+
+* le serveur doit arbitrer ;
+* une modification obsolète doit être détectée ;
+* aucune donnée critique ne doit être écrasée silencieusement.
+
+Les conflits doivent produire un comportement déterministe.
+
+---
+
+# S — INTERFACE UTILISATEUR
+
+## 81. États de chargement
+
+Chaque écran nécessitant des données doit gérer :
+
+* chargement ;
+* succès ;
+* absence de données ;
+* erreur ;
+* nouvelle tentative ;
+* état hors connexion lorsque pertinent.
+
+Une page vide ne doit pas être utilisée comme indication implicite d'erreur.
+
+---
+
+## 82. Accessibilité
+
+L'interface doit respecter les principes d'accessibilité applicables.
+
+Prévoir notamment :
+
+* navigation clavier ;
+* labels ;
+* contrastes suffisants ;
+* messages d'erreur lisibles ;
+* focus ;
+* alternatives textuelles pour les images importantes.
+
+---
+
+## 83. Responsive
+
+Les interfaces doivent fonctionner sur :
+
+* ordinateur ;
+* tablette ;
+* téléphone.
+
+Les écrans métier critiques doivent être testés sur les tailles d'écran cibles.
+
+---
+
+## 84. Navigateurs
+
+La liste des navigateurs officiellement supportés doit être définie avant production.
+
+Les fonctionnalités critiques doivent être testées sur cette liste.
+
+---
+
+## 85. Langues
+
+La langue initiale doit être définie.
+
+L'architecture doit permettre l'ajout de langues sans réécriture complète.
+
+Les textes métier ne doivent pas être dispersés arbitrairement dans le code lorsque l'internationalisation est prévue.
+
+**Valeur à fixer :** langue(s) de lancement.
+
+---
+
+# T — ADMINISTRATION ET AUDIT
+
+## 86. Audit log
+
+Les opérations sensibles doivent générer un journal d'audit.
+
+Au minimum :
+
+* connexion sensible ;
+* création ;
+* modification ;
+* suppression logique ;
+* changement de rôle ;
+* changement de permission ;
+* changement de prix ;
+* changement de stock ;
+* affectation livreur ;
+* encaissement ;
+* remboursement ;
+* annulation ;
+* configuration critique.
+
+---
+
+## 87. Impossibilité de falsification
+
+L'utilisateur ne doit pas pouvoir modifier ou supprimer son propre historique d'audit via l'interface métier.
+
+Les données d'audit doivent être protégées par des permissions distinctes.
+
+---
+
+## 88. Export
+
+Les données administratives pouvant être exportées doivent être explicitement définies.
+
+Un export doit respecter :
+
+* permissions ;
+* filtres ;
+* période ;
+* format ;
+* confidentialité.
+
+L'export doit être traçable lorsqu'il contient des données sensibles.
+
+---
+
+# U — STATISTIQUES
+
+## 89. Définitions mathématiques
+
+Chaque indicateur doit avoir une définition exacte.
+
+Exemples :
+
+**Livrées aujourd'hui** = commandes ayant atteint l'état `delivered` pendant la période concernée.
+
+**Encaissées aujourd'hui** = montants effectivement enregistrés comme encaissés pendant la période.
+
+**À encaisser** = montant restant dû sur les commandes concernées.
+
+Les indicateurs ne doivent pas dépendre de l'état visuel du frontend.
+
+---
+
+## 90. Périodes
+
+Les statistiques doivent pouvoir utiliser des périodes clairement définies :
+
+* aujourd'hui ;
+* hier ;
+* semaine ;
+* mois ;
+* période personnalisée.
+
+Les bornes temporelles doivent être explicites.
+
+---
+
+## 91. Fuseau horaire
+
+Les statistiques doivent utiliser un fuseau horaire de référence unique.
+
+Le changement de jour métier doit être cohérent entre :
+
+* commandes ;
+* encaissements ;
+* livraisons ;
+* stock ;
+* statistiques ;
+* logs.
+
+---
+
+# V — BACKUP / RECOVERY
+
+## 92. Fréquence des sauvegardes
+
+La fréquence doit être définie selon la criticité des données.
+
+Les sauvegardes doivent couvrir les données nécessaires à une restauration réelle.
+
+**Valeur à fixer :** fréquence exacte.
+
+---
+
+## 93. Conservation
+
+Les sauvegardes doivent avoir une durée de conservation définie.
+
+La politique doit prévoir plusieurs générations lorsque nécessaire.
+
+**Valeurs à fixer :** durée et nombre de générations.
+
+---
+
+## 94. Restauration
+
+Une procédure de restauration doit être documentée et testée.
+
+Une sauvegarde considérée comme réussie sans test de restauration ne doit pas être considérée comme preuve suffisante de récupérabilité.
+
+---
+
+## 95. RPO / RTO
+
+Le projet doit définir :
+
+**RPO** : quantité maximale de données pouvant être perdue après incident.
+
+**RTO** : durée maximale cible pour restaurer le service.
+
+**Valeurs à fixer :** RPO et RTO de production.
+
+---
+
+# W — PERFORMANCE
+
+## 96. Temps de réponse
+
+Des objectifs doivent être définis pour les opérations critiques :
+
+* consultation catalogue ;
+* panier ;
+* création commande ;
+* consultation commande ;
+* KDS ;
+* affectation ;
+* encaissement ;
+* statistiques.
+
+Les objectifs doivent être mesurés dans des conditions définies.
+
+---
+
+## 97. Charge
+
+Le système doit être testé avec une charge représentative.
+
+Les tests doivent couvrir notamment :
+
+* commandes simultanées ;
+* accès KDS ;
+* accès administration ;
+* mises à jour temps réel ;
+* stock concurrent ;
+* notifications.
+
+Les limites observées doivent être documentées.
+
+---
+
+# X — SERVICES EXTERNES
+
+## 98. Défaillance Google Maps
+
+Si Google Maps est indisponible :
+
+* le système métier doit continuer lorsque possible ;
+* l'utilisateur doit recevoir un état explicite ;
+* aucune fausse position ou ETA ne doit être affichée ;
+* les fonctionnalités dépendantes doivent être dégradées proprement.
+
+---
+
+## 99. Défaillance SMS / email
+
+Une panne d'un fournisseur de notification ne doit pas modifier silencieusement l'état métier de la commande.
+
+L'échec doit être enregistré.
+
+Une nouvelle tentative peut être effectuée selon la politique définie.
+
+---
+
+## 100. Défaillance stockage photos
+
+Une photo qui ne peut pas être stockée ne doit pas créer une réclamation faussement considérée comme complète si la pièce jointe est obligatoire.
+
+L'erreur doit être signalée.
+
+---
+
+## 101. Dépendances externes
+
+Chaque dépendance externe critique doit être documentée :
+
+* service ;
+* fonction ;
+* configuration ;
+* clés ;
+* quota ;
+* coût éventuel ;
+* comportement en panne ;
+* solution de secours lorsque nécessaire.
+
+---
+
+# Y — IMPORT / EXPORT
+
+## 102. Import
+
+Les imports doivent être contrôlés.
+
+Avant import :
+
+* format ;
+* colonnes ;
+* types ;
+* valeurs ;
+* doublons ;
+* références ;
+* contraintes.
+
+---
+
+## 103. Validation import
+
+Un import invalide ne doit pas créer partiellement des données sans comportement explicitement défini.
+
+Le système doit fournir un rapport d'erreurs.
+
+Les erreurs doivent identifier la ligne et la donnée concernée lorsque possible.
+
+---
+
+## 104. Export
+
+Les exports doivent respecter :
+
+* permissions ;
+* filtres ;
+* période ;
+* format ;
+* confidentialité.
+
+Les données exportées doivent être cohérentes avec les données affichées et la base.
+
+---
+
+# Z — MIGRATION
+
+## 105. Données initiales
+
+Les données initiales doivent être identifiées :
+
+* produits ;
+* catégories ;
+* options ;
+* ingrédients ;
+* recettes ;
+* clients ;
+* commandes historiques ;
+* fournisseurs ;
+* livreurs ;
+* configuration.
+
+Chaque source doit être documentée.
+
+---
+
+## 106. Migration
+
+Une migration doit comporter :
+
+1. sauvegarde ;
+2. préparation ;
+3. transformation ;
+4. import ;
+5. validation ;
+6. comparaison ;
+7. vérification fonctionnelle.
+
+Les quantités et montants doivent être vérifiés après migration.
+
+---
+
+## 107. Rollback migration
+
+Chaque migration critique doit disposer d'une stratégie de retour arrière.
+
+Le rollback doit être testé lorsque techniquement possible.
+
+Une migration partiellement exécutée ne doit pas être considérée comme réussie.
+
+---
+
+# AA — OBSERVABILITÉ
+
+## 108. Santé du système
+
+Le système doit disposer d'indicateurs de santé permettant de détecter :
+
+* backend indisponible ;
+* base indisponible ;
+* erreurs élevées ;
+* temps de réponse anormal ;
+* file de tâches bloquée ;
+* notifications en échec ;
+* dépendance externe indisponible.
+
+---
+
+## 109. Alertes
+
+Les incidents importants doivent pouvoir générer une alerte.
+
+Les seuils doivent être définis.
+
+Une alerte doit contenir suffisamment d'informations pour identifier le problème.
+
+---
+
+## 110. Corrélation
+
+Les opérations critiques doivent pouvoir être corrélées à l'aide d'identifiants techniques.
+
+Un même événement doit pouvoir être retrouvé entre :
+
+* frontend ;
+* API ;
+* backend ;
+* base ;
+* services externes ;
+* logs.
+
+Les identifiants de corrélation ne doivent pas contenir de secret.
+
+---
+
+# AB — DOCUMENTATION
+
+## 111. Installation
+
+La documentation doit permettre à une personne autorisée d'installer le projet depuis un environnement propre.
+
+Elle doit préciser :
+
+* prérequis ;
+* versions ;
+* dépendances ;
+* variables ;
+* commandes ;
+* configuration ;
+* lancement ;
+* vérification.
+
+---
+
+## 112. Configuration
+
+Toutes les variables de configuration doivent être documentées :
+
+* nom ;
+* fonction ;
+* obligatoire/facultative ;
+* environnement ;
+* exemple non sensible.
+
+Les secrets réels ne doivent pas être inclus dans la documentation.
+
+---
+
+## 113. Base de données
+
+La documentation doit expliquer :
+
+* schéma ;
+* tables/collections ;
+* relations ;
+* index ;
+* contraintes ;
+* migrations ;
+* sauvegardes ;
+* restauration.
+
+---
+
+## 114. API
+
+La documentation API doit couvrir :
+
+* endpoints ;
+* authentification ;
+* rôles ;
+* paramètres ;
+* réponses ;
+* erreurs ;
+* pagination ;
+* filtres ;
+* limites ;
+* versionnement.
+
+---
+
+## 115. Rôles
+
+La documentation doit présenter la matrice complète :
+
+* Client ;
+* Cuisine/KDS ;
+* Livreur ;
+* Administration ;
+* Super Admin.
+
+Pour chaque rôle :
+
+* écrans accessibles ;
+* données accessibles ;
+* actions autorisées ;
+* actions interdites.
+
+---
+
+## 116. Déploiement
+
+La procédure de déploiement doit documenter :
+
+* prérequis ;
+* variables ;
+* build ;
+* migration ;
+* déploiement ;
+* validation ;
+* monitoring ;
+* rollback.
+
+---
+
+## 117. Backup / Restore
+
+La documentation doit préciser :
+
+* comment sauvegarder ;
+* où sont stockées les sauvegardes ;
+* comment vérifier une sauvegarde ;
+* comment restaurer ;
+* comment valider la restauration ;
+* qui est autorisé à effectuer ces opérations.
+
+---
+
+## 118. Exploitation
+
+La documentation d'exploitation doit expliquer les opérations courantes :
+
+* gestion des produits ;
+* gestion du stock ;
+* gestion des fournisseurs ;
+* gestion des livreurs ;
+* gestion des commandes ;
+* encaissements ;
+* réclamations ;
+* utilisateurs ;
+* statistiques ;
+* sauvegardes.
+
+---
+
+## 119. Dépannage
+
+Une procédure de dépannage doit couvrir au minimum :
+
+* application inaccessible ;
+* API indisponible ;
+* base indisponible ;
+* commande bloquée ;
+* KDS non actualisé ;
+* stock incohérent ;
+* affectation impossible ;
+* GPS indisponible ;
+* Google Maps indisponible ;
+* notification échouée ;
+* photo impossible à envoyer ;
+* chat indisponible ;
+* problème d'authentification ;
+* problème de permission ;
+* restauration après incident.
+
+Chaque procédure doit indiquer :
+
+1. symptôme ;
+2. vérifications ;
+3. cause possible ;
+4. action corrective ;
+5. vérification finale ;
+6. escalade si nécessaire.
+
+---
+
+# RÈGLE FINALE DES 119 POINTS
+
+Les **119 points ci-dessus doivent être traités individuellement**.
+
+Aucun point ne doit être considéré comme terminé simplement parce qu'une interface existe ou qu'une fonction semble fonctionner.
+
+Pour chaque point :
+
+**SPÉCIFICATION → IMPLÉMENTATION → PREUVE → TEST → VALIDATION**
+
+Une déclaration d'un outil de développement du type :
+
+* « Done » ;
+* « Fixed » ;
+* « Complete » ;
+* « Build successful » ;
+
+ne constitue pas à elle seule une preuve de conformité.
+
+---
+
+# RÈGLE DE NON-INTERPRÉTATION
+
+Lorsqu'une règle métier n'a pas encore reçu une valeur définitive dans les cahiers BEBBA, le développeur ne doit pas l'inventer.
+
+La valeur doit être décidée puis inscrite dans le cahier des charges ou dans une configuration officiellement validée.
+
+Cela concerne notamment :
+
+* horaires ;
+* zones ;
+* minimum de commande ;
+* délais ;
+* promotions ;
+* devise ;
+* fréquence GPS ;
+* conservation GPS ;
+* langues ;
+* sauvegardes ;
+* RPO ;
+* RTO ;
+* performance ;
+* charge ;
+* autres paramètres métier non encore fixés.
+
+---
+
+# CRITÈRE DE CLÔTURE
+
+Le complément des 119 points est considéré comme entièrement traité uniquement lorsque chaque numéro de **1 à 119** possède :
+
+* une spécification ;
+* une implémentation ou une décision documentée lorsqu'il s'agit d'un paramètre ;
+* une preuve ;
+* un test ;
+* une validation.
+
+Aucun point ne doit être déclaré « terminé » sans preuve correspondante.
+
+---
+
+# FIN DU COMPLÉMENT DES 119 POINTS
+
+**BEBBA Healthy Food**
+
+**« Vos Plats santé en un clic »**

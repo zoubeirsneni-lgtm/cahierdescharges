@@ -1,0 +1,988 @@
+# BEBBA Healthy Food
+
+## Cahier des charges technique — Complément de clôture des 50 points
+
+**Slogan officiel : « Vos Plats santé en un clic »**
+
+**Nature du document :** complément des cahiers des charges précédents.
+**Objet :** fermer les derniers points métier, fonctionnels, techniques et de traçabilité identifiés après relecture croisée des cahiers précédents et du complément des 119 points.
+
+Ce document **ne remplace aucun cahier précédent**. Il les complète.
+
+Lorsqu'une valeur métier n'est pas encore arrêtée, elle est explicitement indiquée **« à définir »**.
+
+---
+
+# A — Gestion définitive de la commande
+
+## 1. Numéro de commande officiel
+
+Chaque commande doit disposer d'un **numéro de commande métier unique, stable et lisible**.
+
+Le numéro de commande doit être distinct :
+
+* de l'identifiant technique de base de données ;
+* du `trackingToken` ;
+* de l'identifiant client ;
+* de l'identifiant du livreur.
+
+Le numéro doit rester identique pendant toute la durée de vie de la commande.
+
+Le format définitif est **à définir**.
+
+Il doit être affiché au minimum :
+
+* au client ;
+* à l'administration ;
+* à la cuisine ;
+* au livreur ;
+* dans le suivi de commande ;
+* dans les historiques et journaux concernés.
+
+---
+
+## 2. Justificatif de commande / reçu / facture
+
+Le système doit définir précisément le document ou justificatif associé à une commande.
+
+Il doit être possible de déterminer :
+
+* si un reçu est généré ;
+* si une facture est générée ;
+* à quel moment ;
+* avec quelles informations ;
+* pour quel utilisateur ;
+* avec quel statut de paiement ;
+* comment le document est conservé ;
+* comment il peut être retrouvé.
+
+La distinction entre **commande**, **reçu de paiement** et **facture** doit être explicite.
+
+Les obligations fiscales applicables sont **à définir** selon le cadre légal retenu pour l'exploitation.
+
+---
+
+## 3. Fiscalité et taxes
+
+Le cahier des charges doit définir le comportement du système concernant :
+
+* TVA ;
+* taxes éventuelles ;
+* prix TTC/HT ;
+* frais de livraison ;
+* remises ;
+* montant final.
+
+Le système ne doit pas calculer ou afficher une taxe simplement parce qu'un développeur l'a supposée.
+
+Chaque règle fiscale retenue devra être explicitement paramétrée.
+
+---
+
+# B — Encaissement COD
+
+## 4. Gestion exacte des espèces et de la monnaie
+
+Le paiement à la livraison doit permettre de distinguer :
+
+* montant de la commande ;
+* montant à encaisser ;
+* montant effectivement remis ;
+* monnaie rendue ;
+* éventuel écart ;
+* montant réellement encaissé.
+
+Une livraison ne doit jamais être considérée comme payée simplement parce qu'elle est marquée `delivered`.
+
+Le système doit permettre de conserver l'information financière réelle.
+
+Les règles concernant les écarts de caisse sont **à définir**.
+
+---
+
+## 5. Modes de paiement autorisés à la livraison
+
+Le mode de paiement autorisé en V1 doit être explicitement défini.
+
+La règle métier actuellement établie est :
+
+**V1 = paiement à la livraison / COD uniquement.**
+
+Aucun paiement en ligne ne doit être introduit implicitement.
+
+Si plusieurs moyens de paiement physiques sont ultérieurement autorisés, chacun devra être identifié séparément.
+
+---
+
+# C — Annulation, refus et retour
+
+## 6. Annulation par le client
+
+Le parcours d'annulation client doit être défini selon le statut de la commande.
+
+Le système doit déterminer :
+
+* jusqu'à quel statut l'annulation est possible ;
+* quand elle devient impossible ;
+* ce qui se passe si la cuisine a commencé ;
+* ce qui se passe si le livreur est déjà affecté ;
+* ce qui se passe si le livreur est déjà en déplacement ;
+* l'enregistrement du motif ;
+* l'effet sur le stock ;
+* l'effet financier ;
+* la trace d'audit.
+
+---
+
+## 7. Refus de livraison par le client
+
+Le refus doit être différent d'une annulation préalable.
+
+Le livreur doit pouvoir déclarer un refus avec :
+
+* motif ;
+* date/heure ;
+* identité du livreur ;
+* commande ;
+* éventuellement commentaire ;
+* preuve si nécessaire.
+
+Le système doit empêcher qu'un refus soit enregistré comme une livraison réussie.
+
+---
+
+## 8. Retour d'une commande non livrée
+
+Lorsqu'une commande ne peut pas être livrée, le système doit définir son devenir.
+
+Cas à couvrir :
+
+* client absent ;
+* adresse introuvable ;
+* client injoignable ;
+* refus ;
+* problème de livreur ;
+* incident ;
+* autre motif.
+
+Le devenir physique des aliments et l'état financier de la commande doivent être séparés.
+
+---
+
+## 9. Substitution d'un produit
+
+Le système doit définir si un produit peut être remplacé lorsqu'il devient indisponible après commande.
+
+Si la substitution est autorisée :
+
+* qui peut la proposer ;
+* qui peut l'accepter ;
+* comment le prix est recalculé ;
+* comment l'information est conservée ;
+* comment le client est informé.
+
+Si elle n'est pas autorisée, la commande doit suivre le processus d'indisponibilité défini.
+
+La décision est **à définir**.
+
+---
+
+## 10. Rupture d'un produit après commande
+
+Un produit peut devenir indisponible après la création d'une commande.
+
+Le système doit prévoir ce cas sans supprimer silencieusement la ligne de commande.
+
+Il doit conserver :
+
+* produit initial ;
+* quantité ;
+* prix initial ;
+* raison de l'indisponibilité ;
+* décision prise ;
+* utilisateur ayant pris la décision ;
+* éventuelle modification du total ;
+* notification au client.
+
+---
+
+# D — Traçabilité alimentaire
+
+## 11. Avertissement concernant les allergies
+
+Le système doit permettre de présenter clairement les informations alimentaires disponibles.
+
+Il doit distinguer :
+
+* allergènes déclarés ;
+* informations nutritionnelles ;
+* préférences du client ;
+* personnalisation ;
+* avertissement de sécurité.
+
+Une préférence client ne doit pas être présentée comme une garantie d'absence d'allergène.
+
+Le contenu exact de l'avertissement est **à définir**.
+
+---
+
+## 12. Traçabilité lot → ingrédient → recette → produit → commande
+
+Lorsqu'une traçabilité par lots est retenue, le système doit permettre de relier :
+
+**lot fournisseur → ingrédient → recette → produit → ligne de commande → commande.**
+
+La traçabilité doit permettre de retrouver les commandes concernées par un lot déterminé.
+
+Cette fonctionnalité doit rester compatible avec la gestion actuelle :
+
+* ingrédients ;
+* recettes ;
+* consommation ;
+* stock ;
+* fournisseurs.
+
+---
+
+## 13. Retrait/rappel d'un lot
+
+Lorsqu'un lot est identifié comme problématique, le système doit permettre de déterminer :
+
+* les produits concernés ;
+* les recettes concernées ;
+* les commandes concernées ;
+* les dates concernées ;
+* les quantités concernées.
+
+Le système doit permettre de bloquer l'utilisation ultérieure du lot lorsque cette action est décidée.
+
+Le processus opérationnel de rappel est **à définir**.
+
+---
+
+## 14. Portions et unités culinaires
+
+Les recettes doivent permettre de distinguer les unités techniques de stock des unités culinaires.
+
+Exemples :
+
+* grammes ;
+* kilogrammes ;
+* millilitres ;
+* litres ;
+* pièce ;
+* portion ;
+* dose.
+
+Les conversions doivent être explicites et non déduites arbitrairement.
+
+---
+
+## 15. Modification d'une recette déjà utilisée
+
+Une modification de recette ne doit pas modifier rétroactivement la composition historique d'une commande déjà produite.
+
+Le système doit donc conserver l'information nécessaire pour distinguer :
+
+* recette actuelle ;
+* recette applicable à une ancienne commande ;
+* date de validité ;
+* éventuellement version de recette.
+
+---
+
+## 16. Coût théorique d'un produit
+
+Le système doit pouvoir déterminer le coût théorique d'un produit à partir de sa recette et des coûts d'ingrédients définis.
+
+Le coût théorique doit être distingué :
+
+* du prix de vente ;
+* du prix d'achat d'un ingrédient ;
+* du coût réellement constaté ;
+* de la marge.
+
+Les règles de calcul sont celles définies dans le cahier stock/recettes et doivent être harmonisées avec celui-ci.
+
+---
+
+## 17. Marge
+
+Si la marge est utilisée dans l'administration, le calcul doit être explicitement défini.
+
+Il doit préciser :
+
+* prix de vente ;
+* coût théorique ;
+* coût réel éventuellement retenu ;
+* options ;
+* supplément ;
+* remise ;
+* frais de livraison ;
+* taxes éventuelles.
+
+Une marge ne doit pas être présentée si ses composants ne sont pas suffisamment définis.
+
+---
+
+# E — Fonctionnement de l'entreprise
+
+## 18. Jours fériés et fermetures exceptionnelles
+
+Le système doit permettre de distinguer :
+
+* horaires normaux ;
+* jours de fermeture ;
+* jours fériés ;
+* fermeture exceptionnelle ;
+* ouverture exceptionnelle.
+
+Le comportement du site pendant une fermeture doit être défini :
+
+* empêcher la commande ;
+* permettre une commande différée ;
+* afficher un message ;
+* autre comportement.
+
+Décision métier **à définir**.
+
+---
+
+## 19. Capacité maximale de production cuisine
+
+La cuisine doit pouvoir disposer, si cette règle est retenue, d'une capacité de production.
+
+La capacité peut être exprimée selon :
+
+* nombre de commandes ;
+* nombre de portions ;
+* période ;
+* catégorie ;
+* autre unité.
+
+Le système doit définir le comportement lorsque la capacité est atteinte.
+
+Valeurs et méthode **à définir**.
+
+---
+
+## 20. Créneaux de livraison
+
+Le système doit définir si les clients peuvent choisir :
+
+* une livraison immédiate ;
+* un créneau ;
+* une heure estimée ;
+* plusieurs créneaux.
+
+Les règles concernant :
+
+* disponibilité ;
+* durée ;
+* surcharge ;
+* capacité ;
+* retard ;
+* modification
+
+doivent être explicitement définies.
+
+---
+
+# F — Adresses et géolocalisation
+
+## 21. Adresse impossible à géocoder
+
+Une adresse saisie par un client peut être impossible à géocoder.
+
+Le système ne doit pas créer une position GPS fausse.
+
+Il doit permettre :
+
+* signalement de l'échec ;
+* correction ;
+* saisie complémentaire ;
+* éventuellement localisation manuelle ;
+* validation avant livraison.
+
+Le comportement exact est **à définir**.
+
+---
+
+## 22. Position GPS du client
+
+La position GPS du client doit être distincte de :
+
+* l'adresse textuelle ;
+* la position du livreur ;
+* la position de l'établissement.
+
+Le consentement et les conditions d'utilisation doivent être définis.
+
+Le GPS ne doit pas être utilisé comme preuve d'une adresse sans règle métier explicite.
+
+---
+
+## 23. Preuve de livraison
+
+Le système doit définir la preuve de livraison.
+
+Elle peut notamment comprendre :
+
+* confirmation du client ;
+* code de livraison ;
+* signature ;
+* photo si autorisée ;
+* position GPS ;
+* date/heure ;
+* identité du livreur.
+
+Le mécanisme définitif est **à définir**.
+
+---
+
+## 24. Code de confirmation de livraison
+
+Si un code de confirmation est utilisé, il doit être :
+
+* lié à la commande ;
+* difficile à deviner ;
+* utilisable dans la fenêtre prévue ;
+* invalidé après utilisation ;
+* journalisé.
+
+Il ne doit pas être confondu avec le `trackingToken`.
+
+---
+
+## 25. Communication livreur ↔ client
+
+Le système doit définir comment le livreur peut contacter le client.
+
+Il faut distinguer :
+
+* appel ;
+* message ;
+* éventuel chat ;
+* affichage du numéro ;
+* anonymisation éventuelle.
+
+La conservation des communications doit respecter les règles de confidentialité définies dans le cahier correspondant.
+
+---
+
+# G — Notifications
+
+## 26. Matrice officielle des notifications
+
+Chaque événement pouvant produire une notification doit être identifié.
+
+Pour chaque événement, le cahier final doit préciser :
+
+* destinataire ;
+* canal ;
+* condition ;
+* contenu ;
+* priorité ;
+* répétition éventuelle ;
+* statut d'envoi ;
+* comportement en cas d'échec.
+
+La matrice doit couvrir au minimum :
+
+* commande créée ;
+* commande acceptée ;
+* préparation ;
+* commande prête ;
+* affectation livreur ;
+* livraison ;
+* livraison terminée ;
+* encaissement ;
+* annulation ;
+* incident ;
+* réclamation.
+
+---
+
+# H — Données personnelles et comptes clients
+
+## 27. Suppression/anonymisation du compte client
+
+Le système doit définir ce qui se produit lorsqu'un client demande la suppression de son compte.
+
+Il faut distinguer :
+
+* données supprimables ;
+* données devant être conservées ;
+* anonymisation ;
+* commandes historiques ;
+* données financières ;
+* journaux d'audit.
+
+Une suppression de compte ne doit pas casser l'intégrité des commandes historiques.
+
+---
+
+## 28. Export des données client
+
+Le client doit pouvoir, si cette fonctionnalité est retenue, obtenir les données qui lui sont associées.
+
+Le périmètre doit être défini :
+
+* identité ;
+* téléphone ;
+* adresses ;
+* commandes ;
+* préférences ;
+* réclamations ;
+* autres données.
+
+Format d'export **à définir**.
+
+---
+
+## 29. Gestion des consentements
+
+Le système doit distinguer les différents consentements lorsqu'ils sont nécessaires.
+
+Exemples :
+
+* communication commerciale ;
+* notifications ;
+* géolocalisation ;
+* utilisation d'une photo ;
+* communications liées à la commande.
+
+Chaque consentement doit être :
+
+* explicite lorsque nécessaire ;
+* traçable ;
+* modifiable ;
+* associé à une date/heure.
+
+---
+
+## 30. Blocage d'un client
+
+L'administration doit pouvoir, selon les règles retenues, bloquer un compte.
+
+Le système doit définir :
+
+* motif ;
+* durée ;
+* utilisateur ayant effectué l'action ;
+* effet sur connexion ;
+* effet sur commande ;
+* possibilité de déblocage ;
+* historique.
+
+---
+
+## 31. Normalisation du téléphone et anti-duplication
+
+Le numéro de téléphone doit suivre la règle métier déjà établie :
+
+**numéro international complet, sans `+`, espaces ni séparateurs.**
+
+Format recommandé :
+`00` + indicatif + numéro national.
+
+Exemple :
+`+216 98123456` → `0021698123456`.
+
+Le système doit empêcher qu'un même numéro international normalisé crée plusieurs identités client.
+
+Le client ne choisit pas lui-même son identifiant technique.
+
+---
+
+## 32. Plusieurs commandes simultanées pour un même client
+
+Un même client doit pouvoir avoir plusieurs commandes lorsque le métier l'autorise.
+
+Le système doit distinguer :
+
+* client ;
+* commande ;
+* adresse ;
+* statut de chaque commande ;
+* paiement de chaque commande ;
+* livraison de chaque commande.
+
+Aucune commande ne doit écraser une autre commande du même client.
+
+---
+
+# I — Idempotence et corrélation technique
+
+## 33. Idempotence globale des commandes
+
+Une même requête de création ou de modification critique ne doit pas créer plusieurs effets lorsqu'elle est répétée.
+
+Les opérations critiques concernées doivent être identifiées, notamment :
+
+* création de commande ;
+* paiement/encaissement ;
+* changement d'état ;
+* affectation livreur ;
+* actions financières.
+
+La clé d'idempotence et sa durée de conservation sont **à définir**.
+
+---
+
+## 34. Références de corrélation métier
+
+Les opérations techniques importantes doivent pouvoir être reliées à la commande concernée.
+
+Une corrélation doit permettre de retrouver :
+
+* requête ;
+* commande ;
+* utilisateur ;
+* événement ;
+* opération financière ;
+* erreur éventuelle.
+
+Les identifiants techniques ne doivent pas remplacer les identifiants métier lorsqu'un utilisateur doit comprendre l'opération.
+
+---
+
+# J — Historique et intégrité des commandes
+
+## 35. Archivage des commandes
+
+Les commandes anciennes doivent pouvoir être archivées selon une politique définie.
+
+L'archivage ne doit pas :
+
+* modifier leur historique ;
+* modifier les montants ;
+* supprimer les traces nécessaires ;
+* casser les statistiques historiques.
+
+La durée de conservation est **à définir**.
+
+---
+
+## 36. Verrouillage des commandes historiques
+
+Une commande historiquement clôturée ne doit pas pouvoir être modifiée librement.
+
+Les modifications exceptionnelles doivent :
+
+* être autorisées uniquement aux rôles appropriés ;
+* laisser une trace ;
+* conserver l'ancienne valeur ;
+* conserver la nouvelle valeur ;
+* indiquer qui a effectué la modification ;
+* indiquer pourquoi.
+
+---
+
+## 37. Recherche globale Administration
+
+L'administration doit disposer d'une recherche globale permettant de retrouver une information à partir, selon les droits, de critères tels que :
+
+* numéro de commande ;
+* tracking token ;
+* téléphone ;
+* client ;
+* produit ;
+* livreur ;
+* statut ;
+* date ;
+* référence de paiement.
+
+Les résultats doivent respecter les permissions du rôle connecté.
+
+---
+
+## 38. Chronologie complète d'une commande
+
+Chaque commande doit pouvoir présenter une chronologie métier.
+
+Elle doit permettre de retrouver les événements significatifs :
+
+* création ;
+* préparation ;
+* modification ;
+* affectation ;
+* livraison ;
+* encaissement ;
+* annulation ;
+* incident ;
+* réclamation ;
+* actions administratives.
+
+Chaque événement important doit être horodaté et attribuable.
+
+---
+
+## 39. Détection des états incohérents
+
+Le système doit empêcher ou détecter les combinaisons incohérentes.
+
+Exemples :
+
+* commande `delivered` mais non passée par le processus de livraison prévu ;
+* commande `paid` sans événement d'encaissement correspondant ;
+* commande annulée puis livrée ;
+* commande livrée puis remise en préparation ;
+* livreur affecté alors que la commande est annulée.
+
+Les règles exactes doivent être inscrites dans la matrice officielle des états.
+
+---
+
+## 40. Matrice officielle de la machine d'états
+
+Une matrice unique doit devenir la référence pour tous les statuts.
+
+Elle doit définir :
+
+* états autorisés ;
+* transitions autorisées ;
+* transitions interdites ;
+* acteur autorisé ;
+* conditions ;
+* effets métier ;
+* effets stock ;
+* effets financiers ;
+* notifications ;
+* journalisation.
+
+Cette matrice doit être commune :
+
+* frontend ;
+* backend ;
+* administration ;
+* cuisine ;
+* livreur ;
+* tests.
+
+---
+
+# K — Suppression, administration et sécurité métier
+
+## 41. Politique de suppression physique/anonymisation
+
+Pour chaque type de donnée, le système doit définir si elle est :
+
+* supprimée ;
+* anonymisée ;
+* archivée ;
+* conservée.
+
+La politique doit couvrir au minimum :
+
+* clients ;
+* commandes ;
+* paiements ;
+* produits ;
+* ingrédients ;
+* fournisseurs ;
+* livreurs ;
+* réclamations ;
+* messages ;
+* photos ;
+* logs ;
+* journaux d'audit.
+
+---
+
+## 42. Audit des modifications de configuration
+
+Les modifications de configuration sensibles doivent être journalisées.
+
+Exemples :
+
+* prix ;
+* frais de livraison ;
+* seuils de stock ;
+* horaires ;
+* zones de livraison ;
+* permissions ;
+* comptes administrateurs ;
+* paramètres de notifications ;
+* configuration externe.
+
+Le journal doit identifier :
+
+* auteur ;
+* date/heure ;
+* ancienne valeur ;
+* nouvelle valeur ;
+* contexte.
+
+---
+
+## 43. Actions irréversibles du Super Admin
+
+Les actions irréversibles ou potentiellement destructrices doivent être explicitement identifiées.
+
+Exemples :
+
+* suppression ;
+* suppression définitive ;
+* restauration ;
+* modification historique ;
+* annulation forcée ;
+* correction financière.
+
+Elles doivent être protégées selon leur niveau de risque.
+
+Le Super Admin possède l'accès absolu défini dans les règles métier, mais l'accès absolu ne signifie pas absence de traçabilité.
+
+---
+
+# L — Exploitation et compatibilité
+
+## 44. Mode maintenance
+
+Le système doit pouvoir être placé en maintenance lorsque cette fonctionnalité est retenue.
+
+Le mode maintenance doit définir :
+
+* qui peut l'activer ;
+* qui peut accéder à l'administration ;
+* comportement client ;
+* comportement cuisine ;
+* comportement livreur ;
+* message affiché ;
+* conservation des commandes déjà actives.
+
+---
+
+## 45. Version applicative
+
+Le système doit disposer d'une version identifiable.
+
+La version doit permettre de déterminer :
+
+* version frontend ;
+* version backend ;
+* version des règles métier ;
+* éventuellement version de base de données.
+
+Cette information doit être disponible pour le diagnostic.
+
+---
+
+## 46. Compatibilité frontend/backend
+
+Le frontend et le backend doivent respecter un contrat compatible.
+
+Une nouvelle version backend ne doit pas casser silencieusement un ancien frontend.
+
+Les changements incompatibles doivent être :
+
+* identifiés ;
+* versionnés si nécessaire ;
+* documentés ;
+* testés.
+
+---
+
+# M — Gestion globale des erreurs
+
+## 47. Gestion uniforme des erreurs métier
+
+Toutes les erreurs métier importantes doivent avoir un comportement cohérent.
+
+Une erreur doit être :
+
+* identifiable ;
+* compréhensible par l'utilisateur concerné ;
+* exploitable techniquement ;
+* journalisée lorsque nécessaire ;
+* sans divulgation d'informations sensibles.
+
+Le frontend ne doit pas afficher des erreurs techniques brutes à l'utilisateur.
+
+---
+
+## 48. Gestion globale des états réseau
+
+L'application doit distinguer :
+
+* connecté ;
+* chargement ;
+* réseau lent ;
+* hors ligne ;
+* reconnexion ;
+* erreur serveur ;
+* erreur temporaire ;
+* opération réussie mais réponse perdue.
+
+Une opération critique ne doit pas être répétée aveuglément simplement parce que la réponse précédente n'est pas arrivée.
+
+Ce point doit être cohérent avec l'idempotence du point 33.
+
+---
+
+# N — Détection des doublons métier
+
+## 49. Détection des doublons
+
+Le système doit définir les cas dans lesquels deux objets semblent représenter la même réalité métier.
+
+Au minimum :
+
+* client ;
+* numéro de téléphone ;
+* commande ;
+* produit ;
+* ingrédient ;
+* fournisseur ;
+* livreur.
+
+La détection ne doit pas fusionner automatiquement deux objets sans règle explicite.
+
+Toute fusion éventuelle doit être traçable.
+
+---
+
+# O — Traçabilité finale
+
+## 50. Matrice finale de traçabilité
+
+Le projet doit disposer d'une matrice permettant de relier chaque exigence importante à :
+
+**Exigence → spécification → fonctionnalité → données → API → interface → test → preuve → validation.**
+
+La matrice doit couvrir les cahiers des charges précédents.
+
+Aucune fonctionnalité importante ne doit être considérée comme terminée uniquement parce qu'elle :
+
+* existe dans l'interface ;
+* compile ;
+* est déclarée « Done » ;
+* est déclarée « Fixed » ;
+* passe un build.
+
+La preuve finale doit être objective et reproductible.
+
+---
+
+# Règle de clôture
+
+Les 50 points de ce document sont des **compléments de fermeture**.
+
+Ils ne doivent pas être utilisés pour inventer des règles métier non décidées.
+
+Pour chaque point encore sans décision métier, la valeur doit être explicitement déterminée avant l'implémentation correspondante.
+
+Pour chaque exigence :
+
+**BLOC → AUDIT → PREUVE → STOP → BLOC SUIVANT**
+
+Une déclaration d'un développeur, d'une IA ou d'un outil indiquant « Done », « Fixed », « Complete » ou « Build successful » ne constitue pas, à elle seule, une preuve de conformité.
+
+La conformité finale doit être démontrée par :
+
+1. état réel du code ;
+2. données ;
+3. comportement ;
+4. tests ;
+5. preuve reproductible ;
+6. correspondance avec le cahier des charges.

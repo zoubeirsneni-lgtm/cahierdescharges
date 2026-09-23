@@ -1,0 +1,1847 @@
+Oui. Si tu veux repartir de zéro, le mieux est de figer d’abord un cahier des charges technique qui serve de contrat de référence pour toute l’implémentation. Je vais intégrer les fonctionnalités historiques de BEBBA, mais aussi les deux nouveaux modules : réclamation avec photos + chat Administration et suivi GPS temps réel du livreur sur Google Maps.
+
+Cahier des charges technique — BEBBA Healthy Food
+
+Nom du projet : BEBBA Healthy Food
+Slogan officiel : « Vos Plats santé en un clic »
+Version : V2 — Refonte complète
+Type : plateforme de commande, préparation, livraison et gestion de repas sains
+Mode de paiement V1 : paiement à la livraison (COD)
+Devise : TND / DT
+Zone initiale : Tunisie
+Architecture : Web responsive + API + base de données relationnelle
+Principe fondamental : commande → cuisine → affectation livreur → livraison → encaissement → suivi/réclamation
+
+1. OBJECTIF DU PROJET
+
+BEBBA doit permettre de gérer l'intégralité du cycle d'une commande de repas :
+
+CLIENT
+   ↓
+CONSULTATION CARTE
+   ↓
+PANIER
+   ↓
+COMMANDE
+   ↓
+CONFIRMATION
+   ↓
+CUISINE
+   ↓
+PRÉPARATION
+   ↓
+COMMANDE PRÊTE
+   ↓
+ADMINISTRATION
+   ↓
+AFFECTATION LIVREUR
+   ↓
+LIVREUR
+   ↓
+LIVRAISON
+   ↓
+ENCAISSEMENT
+   ↓
+COMMANDE TERMINÉE
+
+En parallèle :
+
+CLIENT
+   ↓
+SUIVI COMMANDE
+   ↓
+POSITION DU LIVREUR EN TEMPS RÉEL
+   ↓
+GOOGLE MAPS
+
+Et en cas de problème :
+
+CLIENT
+   ↓
+RÉCLAMATION
+   ↓
+PHOTOS / PREUVES
+   ↓
+CHAT AVEC ADMINISTRATION
+   ↓
+TRAITEMENT
+   ↓
+RÉSOLUTION
+2. PRINCIPES MÉTIER NON NÉGOCIABLES
+2.1 Préparation des repas
+
+Les repas sont :
+
+préparés après réception de la commande ;
+non préparés à l'avance ;
+transmis à la cuisine ;
+préparés puis déclarés prêts.
+
+Le système ne doit donc jamais considérer :
+
+« commande créée » = « commande préparée ».
+
+3. TYPES D'UTILISATEURS
+
+Le système doit gérer quatre rôles principaux.
+
+3.1 Client
+
+Accès :
+
+site public ;
+compte client ;
+carte ;
+panier ;
+commandes ;
+suivi ;
+réclamations ;
+chat lié aux réclamations ;
+profil.
+3.2 Cuisine / KDS
+
+Accès uniquement à :
+
+commandes à préparer ;
+détails des produits ;
+quantités ;
+personnalisations ;
+ingrédients nécessaires ;
+statut de préparation.
+
+Actions :
+
+prendre en charge ;
+commencer préparation ;
+déclarer prête.
+3.3 Livreur
+
+Accès :
+
+commandes qui lui sont affectées ;
+informations nécessaires à la livraison ;
+adresse ;
+téléphone client ;
+montant à encaisser ;
+navigation ;
+statut livraison ;
+GPS ;
+historique de ses livraisons.
+
+Actions :
+
+accepter mission ;
+démarrer livraison ;
+partager position ;
+confirmer livraison ;
+confirmer encaissement.
+3.4 Administration / Super Administrateur
+
+Le super administrateur possède l'accès complet :
+
+clients ;
+commandes ;
+cuisine ;
+livreurs ;
+véhicules ;
+stocks ;
+produits ;
+ingrédients ;
+recettes ;
+fournisseurs ;
+réclamations ;
+conversations ;
+suivi GPS ;
+paiements ;
+statistiques ;
+paramètres ;
+utilisateurs ;
+rôles ;
+sécurité.
+4. AUTHENTIFICATION
+Client
+
+Le client doit pouvoir :
+
+Création de compte
+
+Champs :
+
+prénom/nom ;
+téléphone ;
+adresse ;
+mot de passe ;
+éventuellement email.
+
+Le téléphone est obligatoire.
+
+Identifiant client
+
+L'identifiant interne doit être généré à partir du numéro international complet.
+
+Exemple :
+
++216 98 123 456
+
+devient :
+
+0021698123456
+
+Le client ne choisit jamais son username.
+
+Un numéro international complet ne peut correspondre qu'à un seul compte.
+
+5. COMMANDE INVITÉ
+
+Le compte client est recommandé mais le système doit pouvoir accepter une commande invité.
+
+Pour une commande invitée :
+
+nom ;
+téléphone ;
+adresse ;
+contenu panier ;
+mode paiement ;
+tracking.
+
+Le système doit pouvoir proposer la création de compte après commande.
+
+6. CARTE / PRODUITS
+
+Catégories principales :
+
+Healthy
+
+Repas équilibrés.
+
+Grillades
+
+Viandes et grillades.
+
+Enfants
+
+Menus adaptés aux enfants.
+
+Jus détox
+
+Boissons / jus.
+
+Régime complet 30 jours
+
+Programme alimentaire.
+
+7. PERSONNALISATION DES PRODUITS
+
+Un produit peut avoir des options.
+
+Exemples :
+
+Protéines
++1 portion protéine
+Légumes
++ légumes
+Suppléments
+
+Options payantes.
+
+Le prix final doit être recalculé côté serveur.
+
+Important :
+
+Le frontend ne doit jamais être considéré comme source de vérité pour le prix.
+
+8. PANIER
+
+Le panier doit gérer :
+
+ajout ;
+suppression ;
+modification quantité ;
+personnalisation ;
+sous-total ;
+suppléments ;
+frais de livraison ;
+total.
+
+Structure logique :
+
+Produits
++
+Options
++
+Quantités
++
+Frais livraison
+=
+Total commande
+
+Le panier ne doit jamais être perdu lors d'un simple rafraîchissement.
+
+9. COMMANDE
+
+Une commande doit posséder au minimum :
+
+id
+order_number
+client_id
+client_name
+client_phone
+delivery_address
+items
+subtotal
+delivery_fee
+total_amount
+payment_status
+order_status
+assigned_driver_id
+tracking_token
+created_at
+updated_at
+10. STATUTS DE COMMANDE
+
+Workflow officiel :
+
+received
+↓
+preparing
+↓
+ready
+↓
+waiting_for_driver
+↓
+delivering
+↓
+delivered
+
+Annulation :
+
+received → cancelled
+preparing → cancelled
+
+Les transitions doivent être contrôlées côté backend.
+
+Le frontend ne doit jamais pouvoir envoyer arbitrairement :
+
+status = delivered
+11. PAIEMENT
+
+Version initiale :
+
+COD — Cash On Delivery
+
+Deux notions doivent rester totalement séparées :
+
+Livraison
+delivered
+Paiement
+to_collect
+paid
+
+Une commande peut donc être :
+
+delivered
++
+to_collect
+
+Elle n'est pas automatiquement considérée comme encaissée.
+
+12. ENCAISSEMENT
+
+Le livreur peut confirmer :
+
+Montant reçu
+
+Le système enregistre :
+
+payment_status = paid
+
+avec :
+
+paid_at
+paid_by
+collected_amount
+
+L'administration doit pouvoir corriger/valider une opération lorsque le livreur est indisponible.
+
+13. TRACKING COMMANDE
+
+Chaque commande possède :
+
+trackingToken
+
+Format :
+
+8 caractères
+
+Exemple :
+
+AB7K92QX
+
+Le client peut accéder au suivi avec :
+
+/tracking?token=AB7K92QX
+
+Le token doit être suffisamment aléatoire et non prédictible.
+
+14. SUIVI CLIENT
+
+La page de suivi doit afficher :
+
+Informations commande
+numéro ;
+date ;
+produits ;
+total ;
+adresse ;
+téléphone ;
+statut ;
+paiement.
+Timeline
+✓ Commande reçue
+
+✓ Préparation
+
+✓ Commande prête
+
+✓ Livreur affecté
+
+● Livraison en cours
+
+○ Livrée
+15. NOUVEAU MODULE : GPS DU LIVREUR EN TEMPS RÉEL
+
+C'est une fonctionnalité importante et elle doit être conçue proprement.
+
+15.1 Principe
+
+Lorsque le livreur démarre une livraison :
+
+Livreur
+   ↓
+GPS téléphone
+   ↓
+Application / navigateur livreur
+   ↓
+Backend
+   ↓
+Position temps réel
+   ↓
+Client
+   ↓
+Google Maps
+16. GOOGLE MAPS
+
+La page de suivi client doit afficher une carte Google Maps.
+
+Elle doit montrer :
+
+Position du livreur
+
+Marker :
+
+🚚
+Destination
+
+Marker :
+
+📍
+Itinéraire
+
+Lorsque disponible :
+
+Livreur ─────────→ Client
+17. POSITION GPS
+
+Le navigateur/application du livreur demande l'autorisation GPS.
+
+La position comprend :
+
+latitude
+longitude
+accuracy
+timestamp
+heading
+speed
+
+Exemple :
+
+{
+  "latitude": 35.8,
+  "longitude": 10.59,
+  "accuracy": 12,
+  "heading": 87,
+  "speed": 8.2,
+  "timestamp": "..."
+}
+18. FRÉQUENCE GPS
+
+Il ne faut pas envoyer une position toutes les millisecondes.
+
+Le système doit utiliser une logique intelligente :
+
+changement de position significatif ;
+intervalle minimum ;
+gestion de batterie ;
+arrêt automatique à la livraison.
+
+Exemple cible :
+
+5–10 secondes
+
+pendant une livraison active.
+
+La valeur exacte devra être configurable.
+
+19. CONFIDENTIALITÉ GPS
+
+Le client ne doit voir la position du livreur que lorsque :
+
+order_status = delivering
+
+Avant :
+
+ready
+waiting_for_driver
+
+→ pas de position GPS publique.
+
+Après :
+
+delivered
+
+→ suivi temps réel arrêté.
+
+20. HISTORIQUE GPS
+
+Le système peut conserver les positions nécessaires à :
+
+preuve de livraison ;
+analyse ;
+litiges ;
+statistiques.
+
+Mais il ne faut pas conserver indéfiniment toutes les positions GPS.
+
+Une politique de rétention doit être définie.
+
+Exemple :
+
+historique détaillé : 30 jours
+
+puis suppression/anonymisation selon la politique retenue.
+
+21. MODULE RÉCLAMATION
+
+Chaque réclamation doit être liée à :
+
+client
++
+commande
+
+Un client ne doit pas pouvoir ouvrir une réclamation pour une commande qui ne lui appartient pas.
+
+22. TYPES DE RÉCLAMATION
+
+Exemples :
+
+Produit incorrect
+Produit manquant
+Produit endommagé
+Quantité incorrecte
+Problème de qualité
+Commande incomplète
+Problème de livraison
+Problème de paiement
+Autre
+23. CRÉATION D'UNE RÉCLAMATION
+
+Le client sélectionne :
+
+Commande
+↓
+Motif
+↓
+Description
+↓
+Photos
+↓
+Envoyer
+24. PRISE DE PHOTO
+
+Le client doit pouvoir :
+
+Mobile
+
+Utiliser directement :
+
+📷 Appareil photo
+
+ou :
+
+🖼 Galerie
+Desktop
+
+Sélectionner un fichier image.
+
+Formats autorisés :
+
+JPEG
+PNG
+WEBP
+
+Taille maximale configurable.
+
+25. PHOTOS DE RÉCLAMATION
+
+Une réclamation peut avoir plusieurs photos.
+
+Exemple :
+
+Réclamation #REC-2026-00017
+
+Photo 1
+Photo 2
+Photo 3
+
+Le backend doit contrôler :
+
+type MIME ;
+extension ;
+taille ;
+nombre maximum ;
+utilisateur propriétaire ;
+nom de fichier ;
+stockage sécurisé.
+26. STOCKAGE DES PHOTOS
+
+Les photos ne doivent pas être stockées directement dans la base SQL.
+
+Architecture :
+
+Base SQL
+   ↓
+URL / identifiant fichier
+
+Storage
+   ↓
+Image
+
+Les fichiers doivent être privés par défaut.
+
+L'accès doit passer par des URLs temporaires/signées lorsque nécessaire.
+
+27. CHAT INTÉGRÉ AUX RÉCLAMATIONS
+
+Le chat n'est pas un chat général.
+
+Il est uniquement accessible depuis une réclamation.
+
+Structure :
+
+Réclamation
+   ↓
+Conversation
+   ↓
+Client ↔ Administration
+28. EXEMPLE DE CHAT
+
+Client :
+
+J'ai reçu le mauvais repas.
+
+Administration :
+
+Bonjour, pouvez-vous nous envoyer une photo du produit reçu ?
+
+Client :
+
+Oui.
+
+📷 photo
+
+Administration :
+
+Merci. Nous allons traiter votre réclamation.
+
+29. MESSAGES
+
+Chaque message possède :
+
+id
+claim_id
+sender_id
+sender_role
+message
+attachments
+created_at
+read_at
+30. TEMPS RÉEL DU CHAT
+
+Le chat doit être temps réel ou quasi temps réel.
+
+Technologie possible :
+
+WebSocket
+
+ou :
+
+Supabase Realtime
+
+ou équivalent selon l'architecture retenue.
+
+Le choix définitif doit être fait avant développement.
+
+31. STATUTS RÉCLAMATION
+
+Exemple :
+
+open
+↓
+in_review
+↓
+waiting_for_customer
+↓
+resolved
+↓
+closed
+32. ADMINISTRATION DES RÉCLAMATIONS
+
+L'admin doit avoir un tableau :
+
+Réclamation	Commande	Client	Motif	Statut	Dernier message
+
+Filtres :
+
+ouverte ;
+en traitement ;
+attente client ;
+résolue ;
+fermée ;
+date ;
+client ;
+commande.
+33. TRAÇABILITÉ DES RÉCLAMATIONS
+
+Toutes les actions importantes doivent être enregistrées :
+
+création
+changement statut
+message
+photo
+résolution
+fermeture
+administrateur
+date/heure
+34. PRODUITS
+
+L'administration doit pouvoir :
+
+créer ;
+modifier ;
+désactiver ;
+supprimer selon contraintes ;
+gérer prix ;
+gérer catégorie ;
+gérer description ;
+gérer image ;
+gérer disponibilité ;
+gérer personnalisation.
+35. INGRÉDIENTS
+
+Gestion :
+
+nom ;
+unité ;
+coût ;
+stock ;
+seuil minimum ;
+fournisseur ;
+statut.
+
+L'administration doit pouvoir :
+
+ajouter ;
+modifier ;
+supprimer ;
+réapprovisionner.
+36. RECETTES
+
+Chaque produit peut avoir une recette :
+
+Produit
+ ↓
+Ingrédients
+ ↓
+Quantités
+
+Exemple :
+
+Poulet grillé
+
+Poulet       250 g
+Légumes      150 g
+Huile         10 ml
+Épices         5 g
+37. STOCK
+
+Le stock doit être lié aux mouvements.
+
+Types :
+
+purchase
+restock
+consumption
+adjustment
+waste
+return
+
+Ne jamais modifier uniquement :
+
+stock = 27
+
+sans historique lorsque l'opération métier nécessite une traçabilité.
+
+38. STOCK ET COMMANDES
+
+Lorsqu'une commande est validée/préparée :
+
+commande
+ ↓
+recette
+ ↓
+consommation ingrédients
+ ↓
+stock
+
+Cette opération doit être transactionnelle pour éviter les stocks négatifs ou doubles consommations.
+
+39. FOURNISSEURS
+
+Gestion :
+
+fournisseur ;
+téléphone ;
+adresse ;
+email ;
+produits/ingrédients fournis ;
+historique achats.
+40. LIVREURS
+
+Administration :
+
+créer ;
+modifier ;
+désactiver ;
+réactiver ;
+supprimer selon contraintes ;
+login ;
+mot de passe ;
+téléphone ;
+véhicule ;
+statut.
+
+Statuts :
+
+active
+inactive
+suspended
+41. FLOTTES / VÉHICULES
+
+Gestion :
+
+véhicule
+immatriculation
+type
+livreur affecté
+statut
+
+Exemple :
+
+Moto
+Voiture
+Scooter
+42. AFFECTATION LIVREUR
+
+L'administration doit pouvoir :
+
+Commande
+↓
+Affecter livreur
+
+et :
+
+Réaffecter livreur
+
+Une commande ne doit avoir qu'un livreur actif à un instant donné.
+
+Toutes les affectations doivent être historisées.
+
+43. TABLEAU DE BORD ADMIN
+
+Dashboard :
+
+Commandes
+Nouvelles
+En préparation
+Prêtes
+En livraison
+Livrées
+Annulées
+Encaissements
+Total encaissé
+À encaisser
+Aujourd'hui
+Cette semaine
+Ce mois
+Livraison
+Livraisons aujourd'hui
+Livreurs actifs
+Livreurs en livraison
+Réclamations
+Ouvertes
+En traitement
+En attente
+Résolues
+44. TABLEAU DE BORD LIVREUR
+
+Afficher :
+
+LIVRÉES AUJOURD'HUI
+ENCAISSÉES AUJOURD'HUI
+À ENCAISSER
+
+Et :
+
+Mes livraisons
+45. KDS / CUISINE
+
+Interface optimisée tablette/ordinateur.
+
+Colonnes :
+
+NOUVELLES
+    ↓
+EN PRÉPARATION
+    ↓
+PRÊTES
+
+Une commande doit afficher :
+
+numéro ;
+heure ;
+produits ;
+quantités ;
+personnalisations ;
+remarques.
+46. SYSTÈME DE NOTIFICATIONS
+
+Notifications internes :
+
+Cuisine
+
+Nouvelle commande.
+
+Administration
+
+Commande prête.
+
+Livreur
+
+Nouvelle mission.
+
+Client
+
+Commande reçue.
+
+Commande préparée.
+
+Livreur affecté.
+
+Livraison en cours.
+
+Commande livrée.
+
+Réclamation répondue.
+
+47. NOTIFICATIONS CLIENT
+
+Le client doit pouvoir recevoir :
+
+notification web ;
+éventuellement email ;
+éventuellement SMS dans une future version.
+48. SÉCURITÉ
+
+Architecture :
+
+Frontend
+   ↓
+API Backend
+   ↓
+Database
+
+Le frontend ne doit jamais avoir un accès direct privilégié à la base.
+
+49. RBAC
+
+Toutes les routes backend doivent vérifier :
+
+authentication
++
+role
++
+resource ownership
+
+Exemple :
+
+Un client ne peut jamais appeler :
+
+GET /admin/orders
+
+Un livreur ne peut voir que ses commandes.
+
+Un client ne peut voir que ses propres :
+
+commandes ;
+réclamations ;
+conversations ;
+données.
+50. IDOR
+
+Protection obligatoire contre les accès de type :
+
+/order/123
+
+puis :
+
+/order/124
+
+par simple modification de l'ID.
+
+Chaque accès doit vérifier la propriété de la ressource.
+
+51. VALIDATION BACKEND
+
+Toutes les données entrantes doivent être validées.
+
+Exemples :
+
+téléphone ;
+adresse ;
+quantité ;
+prix ;
+statut ;
+rôle ;
+fichier ;
+photo ;
+coordonnées GPS.
+
+Le backend ne doit jamais faire confiance au frontend.
+
+52. MOTS DE PASSE
+
+Minimum :
+
+12 caractères recommandé
+
+Stockage :
+
+Argon2id
+
+ou bcrypt avec paramètres correctement configurés.
+
+Jamais de mot de passe en clair.
+
+53. PROTECTION AUTHENTIFICATION
+
+Prévoir :
+
+rate limiting ;
+protection brute force ;
+expiration session ;
+rotation token ;
+révocation session ;
+logs de connexion ;
+éventuellement 2FA pour administration.
+54. JOURNAL D'AUDIT
+
+Les opérations sensibles doivent être enregistrées :
+
+login
+logout
+création commande
+modification commande
+affectation livreur
+réaffectation
+validation paiement
+modification stock
+création produit
+suppression
+modification utilisateur
+réclamation
+résolution
+55. ARCHITECTURE TECHNIQUE RECOMMANDÉE
+
+Pour une refonte propre, je recommande une architecture :
+
+Frontend
+React + TypeScript
+        ↓
+API
+Node.js + TypeScript
+        ↓
+PostgreSQL
+        ↓
+Storage
+        ↓
+Realtime
+
+Avec :
+
+Google Maps Platform
+
+pour :
+
+carte ;
+géolocalisation ;
+itinéraire.
+56. BASE DE DONNÉES
+
+Tables principales :
+
+users
+roles
+clients
+addresses
+products
+categories
+product_options
+ingredients
+recipes
+recipe_items
+suppliers
+stock
+stock_movements
+orders
+order_items
+order_item_options
+payments
+drivers
+vehicles
+driver_assignments
+driver_locations
+notifications
+claims
+claim_attachments
+claim_messages
+audit_logs
+57. STRUCTURE RELATIONNELLE
+
+Exemple :
+
+users
+  │
+  ├── clients
+  │
+  ├── drivers
+  │
+  └── admin users
+
+clients
+  │
+  ├── addresses
+  ├── orders
+  └── claims
+
+orders
+  │
+  ├── order_items
+  ├── payments
+  ├── driver_assignments
+  └── claims
+
+claims
+  │
+  ├── claim_attachments
+  └── claim_messages
+
+drivers
+  │
+  ├── vehicles
+  ├── assignments
+  └── locations
+58. TEMPS RÉEL
+
+Deux fonctionnalités nécessitent du temps réel :
+
+GPS
+Driver → Server → Client
+Chat
+Client ↔ Server ↔ Admin
+
+Le système doit utiliser une infrastructure temps réel fiable plutôt que des boucles de polling agressives.
+
+59. GOOGLE MAPS API
+
+Prévoir les services nécessaires :
+
+Maps JavaScript API
+
+et selon les besoins :
+
+Geocoding API
+Routes API
+Places API
+
+Les clés doivent être protégées et limitées par domaine/API.
+
+60. ADRESSES
+
+Le client doit pouvoir enregistrer :
+
+adresse
+ville
+gouvernorat
+latitude
+longitude
+instructions livraison
+
+La latitude/longitude permettent notamment de faciliter la livraison.
+
+61. ESTIMATION LIVRAISON
+
+Le système peut calculer :
+
+distance
++
+temps estimé
++
+frais livraison
+
+Les règles tarifaires doivent être configurables.
+
+Exemple :
+
+0–3 km     → 4 DT
+3–6 km     → 6 DT
+6–10 km    → 8 DT
+
+Ces valeurs sont des exemples, pas des valeurs imposées.
+
+62. TRACKING PUBLIC
+
+Le lien de tracking doit exposer uniquement les informations nécessaires.
+
+Il ne doit jamais exposer :
+
+données internes ;
+adresse complète de base de données ;
+identifiants internes ;
+données d'autres commandes ;
+informations privées du livreur.
+63. TRACKING GPS PUBLIC
+
+Le client voit :
+
+Commande #BEBBA-xxxx
+
+Statut : Livraison en cours
+
+🚚 Livreur
+     ↓
+    MAP
+     ↓
+📍 Destination
+
+Dernière position :
+il y a 8 secondes
+
+Si le GPS n'est momentanément plus disponible :
+
+Dernière position connue :
+il y a 2 min
+
+et non une fausse position.
+
+64. RÉCLAMATION + GPS
+
+Une réclamation peut être créée uniquement pour une commande existante.
+
+Le système doit afficher :
+
+Commande
+Date
+Produits
+Montant
+Livraison
+Statut
+
+Puis :
+
+Créer une réclamation
+65. RÈGLES RÉCLAMATION
+
+Exemples :
+
+réclamation uniquement après livraison ;
+délai configurable ;
+maximum X jours après livraison ;
+une réclamation peut contenir plusieurs messages ;
+plusieurs photos ;
+administration peut demander des informations complémentaires.
+
+Le délai doit être paramétrable.
+
+66. RÉSOLUTION RÉCLAMATION
+
+L'administration peut enregistrer :
+
+résolution
+
+Exemples :
+
+Aucune action
+Remboursement
+Remplacement
+Avoir
+Geste commercial
+Autre
+
+Même si le remboursement en ligne n'existe pas en V1, le système peut enregistrer une décision administrative.
+
+67. HISTORIQUE CLIENT
+
+Le client doit voir :
+
+Mes commandes
+
+avec :
+
+date ;
+numéro ;
+montant ;
+statut ;
+paiement.
+
+Et :
+
+Mes réclamations
+
+avec :
+
+commande ;
+motif ;
+statut ;
+dernier message.
+68. ADMINISTRATION CLIENTS
+
+Admin :
+
+recherche ;
+téléphone ;
+historique ;
+commandes ;
+réclamations ;
+statut compte ;
+adresses.
+69. STATISTIQUES
+
+Prévoir :
+
+CA
+jour
+semaine
+mois
+année
+Commandes
+nombre
+panier moyen
+annulations
+Produits
+plus vendus
+moins vendus
+Livraison
+temps moyen
+nombre livraisons
+Réclamations
+nombre
+motifs
+temps moyen résolution
+70. RESPONSIVE
+
+Le système doit fonctionner sur :
+
+PC
+Laptop
+Tablette
+Android
+iPhone
+
+Interfaces spécifiques :
+
+Client
+
+Mobile-first.
+
+Livreur
+
+Mobile-first.
+
+Cuisine
+
+Tablette / desktop.
+
+Administration
+
+Desktop / tablette.
+
+71. PWA
+
+Une PWA peut être utilisée pour le client/livreur :
+
+Ajouter à l'écran d'accueil
+
+Particulièrement utile pour le livreur.
+
+72. MODE LIVREUR
+
+Le livreur doit pouvoir :
+
+Se connecter
+↓
+Voir mission
+↓
+Voir adresse
+↓
+Ouvrir navigation
+↓
+Démarrer livraison
+↓
+Autoriser GPS
+↓
+Partager position
+↓
+Livrer
+↓
+Confirmer livraison
+↓
+Encaisser
+↓
+Confirmer paiement
+73. ARRÊT DU GPS
+
+Lorsque :
+
+payment_status
+
+est finalisé et :
+
+order_status = delivered
+
+le partage GPS doit être arrêté.
+
+74. PROTECTION CONTRE LES FAUSSES POSITIONS
+
+Le serveur doit vérifier :
+
+utilisateur authentifié ;
+rôle livreur ;
+livreur affecté à la commande ;
+commande en livraison ;
+coordonnées valides ;
+fréquence des mises à jour.
+75. TESTS
+
+Le projet doit avoir des tests :
+
+Unitaires
+
+Calculs :
+
+prix ;
+livraison ;
+stock ;
+transitions.
+Intégration
+création commande ;
+préparation ;
+affectation ;
+livraison ;
+paiement ;
+réclamation.
+Sécurité
+accès client/admin ;
+accès client/livreur ;
+IDOR ;
+fichiers ;
+GPS.
+E2E
+
+Scénario complet :
+
+Client
+→ commande
+→ cuisine
+→ admin
+→ livreur
+→ GPS
+→ livraison
+→ paiement
+→ réclamation
+→ photo
+→ chat
+→ résolution
+76. CRITÈRES D'ACCEPTATION PRINCIPAUX
+
+Le projet ne sera considéré terminé que lorsque ce scénario fonctionne réellement :
+
+1. Client crée compte
+2. Client choisit repas
+3. Client personnalise
+4. Client ajoute panier
+5. Client commande
+6. Commande apparaît cuisine
+7. Cuisine prépare
+8. Cuisine déclare prête
+9. Admin affecte livreur
+10. Livreur reçoit mission
+11. Livreur démarre livraison
+12. GPS activé
+13. Client voit livreur sur Google Maps
+14. Livreur arrive
+15. Livreur confirme livraison
+16. Livreur encaisse
+17. Paiement passe à PAID
+18. GPS s'arrête
+19. Client ouvre réclamation
+20. Client prend photo
+21. Photo est enregistrée
+22. Admin reçoit réclamation
+23. Admin répond dans le chat
+24. Client répond
+25. Admin résout
+26. Historique complet conservé
+77. ARCHITECTURE DES STATUTS
+
+Il faut absolument éviter les statuts incohérents.
+
+Commande
+RECEIVED
+PREPARING
+READY
+WAITING_FOR_DRIVER
+DELIVERING
+DELIVERED
+CANCELLED
+Paiement
+TO_COLLECT
+PAID
+Réclamation
+OPEN
+IN_REVIEW
+WAITING_FOR_CUSTOMER
+RESOLVED
+CLOSED
+Livreur
+AVAILABLE
+BUSY
+OFFLINE
+SUSPENDED
+78. RÈGLE IMPORTANTE : AUCUN ÉTAT IMPLICITE
+
+Exemple interdit :
+
+delivered = paid
+
+Exemple correct :
+
+order_status = delivered
+payment_status = to_collect
+
+Puis :
+
+payment_status = paid
+
+après confirmation de l'encaissement.
+
+Même principe pour :
+
+ready
+assigned
+delivering
+GPS
+79. DÉVELOPPEMENT PAR BLOCS
+
+Pour éviter les problèmes rencontrés précédemment, le projet doit être construit par blocs strictement séparés.
+
+BLOC 0 — Architecture
+choix stack ;
+structure ;
+conventions ;
+base de données ;
+sécurité.
+BLOC 1 — Authentification
+utilisateurs ;
+rôles ;
+login ;
+sessions.
+BLOC 2 — Catalogue
+catégories ;
+produits ;
+options.
+BLOC 3 — Panier
+panier ;
+calcul prix.
+BLOC 4 — Commandes
+création ;
+statuts ;
+tracking.
+BLOC 5 — Cuisine
+KDS ;
+préparation.
+BLOC 6 — Administration
+commandes ;
+affectation.
+BLOC 7 — Livreurs
+missions ;
+livraison ;
+encaissement.
+BLOC 8 — Stock
+ingrédients ;
+recettes ;
+mouvements.
+BLOC 9 — GPS
+géolocalisation ;
+Google Maps ;
+temps réel.
+BLOC 10 — Réclamations
+création ;
+photos ;
+stockage.
+BLOC 11 — Chat
+client ;
+administration ;
+temps réel.
+BLOC 12 — Notifications
+événements ;
+notifications.
+BLOC 13 — Statistiques
+dashboard.
+BLOC 14 — Sécurité
+audit ;
+permissions ;
+tests.
+BLOC 15 — Tests E2E
+
+Scénario complet de bout en bout.
+
+80. MÉTHODE DE VALIDATION
+
+Pour chaque bloc :
+
+BLOC
+ ↓
+AUDIT
+ ↓
+PREUVE
+ ↓
+STOP
+ ↓
+BLOC SUIVANT
+
+Cela signifie :
+
+vérifier l'état réel ;
+identifier précisément le problème ;
+modifier uniquement ce qui est nécessaire ;
+vérifier réellement le résultat ;
+ne pas considérer « DONE » comme une preuve ;
+passer au bloc suivant uniquement après validation.
+81. GIT
+
+Git doit être la source de vérité du projet.
+
+Branches recommandées :
+
+main
+develop
+feature/*
+
+Chaque bloc doit avoir :
+
+commit
+
+avec message explicite.
+
+Exemple :
+
+feat(auth): implement client and staff authentication
+82. ENVIRONNEMENT
+
+Les secrets ne doivent jamais être commités :
+
+.env
+API keys
+database passwords
+JWT secrets
+Google Maps private keys
+storage credentials
+
+Utiliser :
+
+.env.example
+
+avec uniquement les noms de variables.
+
+83. SAUVEGARDES
+
+Prévoir :
+
+backup base de données ;
+backup fichiers ;
+historique Git ;
+procédure restauration.
+84. OBSERVABILITÉ
+
+Prévoir :
+
+logs backend ;
+erreurs ;
+événements importants ;
+monitoring ;
+audit logs.
+
+Les erreurs doivent avoir un identifiant permettant de les retrouver.
+
+85. PERFORMANCE
+
+Objectifs :
+
+pages rapides ;
+pagination ;
+index DB ;
+images optimisées ;
+lazy loading ;
+pas de requêtes inutiles ;
+pas de polling agressif.
+
+Le tracking GPS ne doit pas provoquer une surcharge du serveur.
+
+86. STOCKAGE IMAGES
+
+Les images produits et les photos de réclamation doivent être séparées :
+
+/products/
+
+et :
+
+/claims/
+
+Les photos de réclamation doivent avoir des permissions plus strictes.
+
+87. DONNÉES SENSIBLES
+
+Ne jamais exposer publiquement :
+
+mots de passe ;
+tokens d'authentification ;
+coordonnées privées inutiles ;
+données administratives ;
+informations internes ;
+historique GPS non autorisé.
+88. ARCHITECTURE FINALE
+
+Le schéma général sera :
+
+                         ┌──────────────────┐
+                         │      CLIENT      │
+                         └────────┬─────────┘
+                                  │
+                       ┌──────────▼──────────┐
+                       │      FRONTEND       │
+                       └──────────┬──────────┘
+                                  │
+                         HTTPS / WebSocket
+                                  │
+                       ┌──────────▼──────────┐
+                       │       API           │
+                       │  Node / TypeScript  │
+                       └──────┬─────┬────────┘
+                              │     │
+                ┌─────────────┘     └─────────────┐
+                ▼                                 ▼
+        ┌───────────────┐                 ┌───────────────┐
+        │  PostgreSQL   │                 │    Storage    │
+        │               │                 │ photos/images │
+        └───────────────┘                 └───────────────┘
+                │
+                │
+       ┌────────▼────────┐
+       │ Realtime Server │
+       └───────┬─────────┘
+               │
+       ┌───────┴───────────────┐
+       │                       │
+       ▼                       ▼
+   CHAT CLIENT              GPS LIVREUR
+                               │
+                               ▼
+                         GOOGLE MAPS
+89. RÉSULTAT FINAL ATTENDU
+
+À la fin, BEBBA doit être une plateforme où :
+
+Client
+Créer compte
+↓
+Choisir repas
+↓
+Commander
+↓
+Suivre
+↓
+Voir le livreur sur carte
+↓
+Recevoir
+↓
+Payer
+↓
+Réclamer si problème
+↓
+Photographier
+↓
+Discuter avec administration
+Cuisine
+Recevoir
+↓
+Préparer
+↓
+Déclarer prêt
+Administration
+Superviser
+↓
+Affecter
+↓
+Suivre
+↓
+Gérer stocks
+↓
+Gérer livreurs
+↓
+Gérer réclamations
+↓
+Répondre au chat
+↓
+Résoudre
+Livreur
+Recevoir mission
+↓
+Naviguer
+↓
+Partager GPS
+↓
+Livrer
+↓
+Encaisser
+↓
+Terminer

@@ -1,0 +1,2381 @@
+# CAHIER DES CHARGES TECHNIQUE COMPLÉMENTAIRE
+
+## BEBBA Healthy Food
+
+### Complément du cahier des charges initial
+
+**Projet :** BEBBA Healthy Food
+**Slogan :** « Vos Plats santé en un clic »
+**Document :** Complément technique et fonctionnel
+**Objet :** compléter le cahier des charges initial sans le remplacer
+
+---
+
+# 1. OBJET DU DOCUMENT
+
+Le présent document complète le cahier des charges initial de BEBBA Healthy Food.
+
+Il précise les éléments qui doivent être définis de manière détaillée avant le développement :
+
+* administration générale ;
+* gestion des utilisateurs et des rôles ;
+* gestion des clients ;
+* gestion des commandes ;
+* gestion de la cuisine ;
+* gestion des produits ;
+* gestion des ingrédients ;
+* gestion des recettes ;
+* gestion du stock ;
+* gestion des fournisseurs ;
+* gestion des livreurs ;
+* gestion de la flotte ;
+* gestion des livraisons ;
+* gestion des encaissements ;
+* suivi GPS temps réel ;
+* suivi de commande ;
+* réclamations ;
+* photos de réclamation ;
+* chat client ↔ administration ;
+* notifications ;
+* statistiques ;
+* journal d'audit ;
+* permissions ;
+* règles de sécurité ;
+* règles d'intégrité des données ;
+* interfaces d'administration ;
+* critères de validation.
+
+Le présent document **ne supprime aucune fonctionnalité définie dans le cahier des charges initial**.
+
+---
+
+# 2. STRUCTURE GÉNÉRALE DE L'ADMINISTRATION
+
+L'administration doit disposer d'une interface protégée organisée comme suit :
+
+```text
+ADMINISTRATION
+│
+├── Tableau de bord
+│
+├── Commandes
+│   ├── Toutes
+│   ├── Nouvelles
+│   ├── En préparation
+│   ├── Prêtes
+│   ├── En attente de livreur
+│   ├── En livraison
+│   ├── Livrées
+│   ├── Annulées
+│   └── Encaissements
+│
+├── Cuisine / KDS
+│
+├── Clients
+│
+├── Produits
+│   ├── Catégories
+│   ├── Produits
+│   └── Options / Suppléments
+│
+├── Ingrédients
+│
+├── Recettes
+│
+├── Stock
+│   ├── Stock actuel
+│   ├── Entrées
+│   ├── Sorties
+│   ├── Ajustements
+│   ├── Pertes
+│   └── Historique
+│
+├── Fournisseurs
+│
+├── Livreurs
+│
+├── Flotte / Véhicules
+│
+├── Livraisons / Suivi GPS
+│
+├── Paiements / Encaissements
+│
+├── Réclamations
+│   ├── Liste
+│   ├── Détails
+│   ├── Photos
+│   └── Chat
+│
+├── Notifications
+│
+├── Statistiques
+│
+├── Utilisateurs / Rôles
+│
+├── Journal d'audit
+│
+└── Paramètres
+```
+
+---
+
+# 3. SUPER ADMINISTRATEUR
+
+Le rôle Super Administrateur constitue le niveau d'administration maximal.
+
+Il peut accéder à l'ensemble des modules.
+
+Le Super Administrateur peut :
+
+* consulter ;
+* créer ;
+* modifier ;
+* désactiver ;
+* réactiver ;
+* affecter ;
+* réaffecter ;
+* valider ;
+* corriger les données lorsque l'action est autorisée ;
+* consulter les historiques ;
+* traiter les réclamations ;
+* répondre aux clients ;
+* superviser les livreurs ;
+* consulter les livraisons en cours ;
+* consulter le suivi GPS ;
+* gérer les stocks ;
+* gérer les produits ;
+* gérer les utilisateurs ;
+* consulter les journaux d'audit.
+
+Toute action sensible doit être enregistrée dans le journal d'audit.
+
+---
+
+# 4. TABLEAU DE BORD ADMINISTRATEUR
+
+Le tableau de bord doit afficher au minimum :
+
+## Commandes
+
+* commandes reçues ;
+* commandes en préparation ;
+* commandes prêtes ;
+* commandes en attente de livreur ;
+* commandes en livraison ;
+* commandes livrées ;
+* commandes annulées.
+
+## Paiements
+
+* montant total des commandes ;
+* montant encaissé ;
+* montant restant à encaisser ;
+* encaissements du jour ;
+* encaissements sur période.
+
+## Livraison
+
+* livreurs disponibles ;
+* livreurs en livraison ;
+* commandes sans livreur ;
+* livraisons terminées.
+
+## Stock
+
+* ingrédients sous seuil ;
+* ingrédients épuisés ;
+* mouvements récents.
+
+## Réclamations
+
+* nouvelles réclamations ;
+* réclamations en traitement ;
+* réclamations en attente du client ;
+* réclamations résolues.
+
+Chaque indicateur doit être cliquable pour accéder à la liste correspondante.
+
+---
+
+# 5. ADMINISTRATION DES COMMANDES
+
+## 5.1 Liste des commandes
+
+La liste doit permettre :
+
+* recherche par numéro ;
+* recherche par client ;
+* recherche par téléphone ;
+* filtrage par statut ;
+* filtrage par paiement ;
+* filtrage par livreur ;
+* filtrage par date ;
+* tri par date ;
+* accès au détail.
+
+Colonnes minimales :
+
+```text
+Numéro
+Date
+Client
+Téléphone
+Montant
+Statut commande
+Statut paiement
+Livreur
+Dernière mise à jour
+Actions
+```
+
+---
+
+# 6. FICHE DÉTAILLÉE D'UNE COMMANDE
+
+La fiche commande doit afficher :
+
+## Client
+
+* nom ;
+* téléphone ;
+* identifiant client ;
+* adresse de livraison.
+
+## Commande
+
+* numéro ;
+* date ;
+* produits ;
+* quantités ;
+* options ;
+* suppléments ;
+* remarques ;
+* sous-total ;
+* frais de livraison ;
+* total.
+
+## Livraison
+
+* livreur affecté ;
+* statut ;
+* heure d'affectation ;
+* heure de début ;
+* heure de livraison ;
+* suivi GPS lorsqu'il est actif.
+
+## Paiement
+
+* mode ;
+* montant attendu ;
+* montant encaissé ;
+* statut ;
+* date d'encaissement ;
+* personne ayant validé.
+
+## Historique
+
+Toutes les transitions doivent être consultables.
+
+---
+
+# 7. AFFECTATION DES LIVREURS
+
+L'administration doit disposer d'une action :
+
+```text
+Affecter un livreur
+```
+
+La liste doit présenter les livreurs disponibles.
+
+Pour chaque livreur :
+
+* nom ;
+* téléphone ;
+* véhicule ;
+* statut ;
+* nombre de livraisons actives.
+
+Après affectation :
+
+```text
+assignedDriverId = ID du livreur
+```
+
+L'affectation doit être persistée côté serveur.
+
+---
+
+# 8. RÉAFFECTATION
+
+L'administration peut réaffecter une commande.
+
+Lors d'une réaffectation :
+
+1. vérifier l'autorisation ;
+2. enregistrer l'ancien livreur ;
+3. enregistrer le nouveau livreur ;
+4. enregistrer la date ;
+5. enregistrer l'administrateur ayant effectué l'opération ;
+6. notifier le livreur concerné ;
+7. mettre à jour la commande.
+
+L'historique ne doit pas être écrasé.
+
+---
+
+# 9. ANNULATION
+
+L'annulation doit être soumise aux règles de statut définies dans le cahier des charges initial.
+
+Une annulation doit enregistrer :
+
+* utilisateur ;
+* date ;
+* raison ;
+* ancien statut ;
+* nouveau statut.
+
+Si une commande a déjà entraîné une consommation de stock, les règles de restitution doivent être appliquées selon l'état de la préparation.
+
+---
+
+# 10. ADMINISTRATION CUISINE / KDS
+
+L'écran Cuisine doit être conçu pour une utilisation opérationnelle.
+
+Colonnes :
+
+```text
+NOUVELLES
+↓
+EN PRÉPARATION
+↓
+PRÊTES
+```
+
+Chaque carte commande doit afficher :
+
+* numéro ;
+* heure ;
+* produits ;
+* quantité ;
+* options ;
+* suppléments ;
+* remarques ;
+* temps écoulé.
+
+Actions :
+
+```text
+Prendre en préparation
+Déclarer prête
+```
+
+Une commande déclarée prête doit passer vers l'état prévu :
+
+```text
+waiting_for_driver
+```
+
+selon les règles du workflow initial.
+
+---
+
+# 11. PROTECTION DE LA CUISINE
+
+Un utilisateur Cuisine ne doit pas pouvoir :
+
+* modifier le prix d'une commande ;
+* modifier le paiement ;
+* affecter un livreur ;
+* accéder aux paramètres administratifs ;
+* gérer les comptes utilisateurs ;
+* modifier les permissions.
+
+Il doit uniquement disposer des fonctions nécessaires à son travail.
+
+---
+
+# 12. ADMINISTRATION DES CLIENTS
+
+## Liste
+
+Filtres :
+
+* nom ;
+* téléphone ;
+* identifiant ;
+* date d'inscription ;
+* statut.
+
+## Fiche client
+
+Afficher :
+
+* identité ;
+* téléphone ;
+* adresses ;
+* historique commandes ;
+* montant total commandé ;
+* commandes en cours ;
+* réclamations ;
+* statut du compte.
+
+L'administration ne doit jamais afficher le mot de passe du client.
+
+---
+
+# 13. ADMINISTRATION DES PRODUITS
+
+## Catégories
+
+CRUD complet :
+
+* créer ;
+* modifier ;
+* activer ;
+* désactiver ;
+* supprimer lorsque possible.
+
+Catégories initiales :
+
+* Healthy ;
+* Grillades ;
+* Enfants ;
+* Jus détox ;
+* Régime complet 30 jours.
+
+## Produit
+
+Champs :
+
+* identifiant ;
+* nom ;
+* description ;
+* catégorie ;
+* prix ;
+* image ;
+* disponibilité ;
+* statut ;
+* ordre d'affichage.
+
+---
+
+# 14. OPTIONS ET SUPPLÉMENTS
+
+Chaque produit peut posséder des options.
+
+Une option doit comporter :
+
+* nom ;
+* prix ;
+* type ;
+* disponibilité ;
+* quantité éventuelle ;
+* statut.
+
+Exemples :
+
+```text
+Portion supplémentaire de protéines
+Légumes supplémentaires
+Supplément payant
+```
+
+Le prix doit être recalculé côté backend.
+
+---
+
+# 15. ADMINISTRATION DES INGRÉDIENTS
+
+L'administration doit disposer d'un véritable CRUD.
+
+## Liste
+
+Colonnes :
+
+```text
+Nom
+Unité
+Stock actuel
+Seuil minimum
+Coût unitaire
+Fournisseur
+Statut
+Actions
+```
+
+## Création
+
+Champs :
+
+* nom ;
+* unité ;
+* coût d'achat ;
+* seuil minimum ;
+* fournisseur ;
+* statut.
+
+## Modification
+
+Tous les champs métier autorisés doivent être modifiables.
+
+## Suppression
+
+Une suppression ne doit pas détruire l'historique lorsqu'un ingrédient a déjà été utilisé.
+
+Dans ce cas, utiliser une désactivation plutôt qu'une suppression physique.
+
+---
+
+# 16. UNITÉS DE STOCK
+
+Le système doit gérer des unités cohérentes :
+
+```text
+g
+kg
+ml
+L
+pièce
+```
+
+Une unité doit être définie pour chaque ingrédient.
+
+Les conversions nécessaires doivent être centralisées.
+
+Exemple :
+
+```text
+1 kg = 1000 g
+1 L = 1000 ml
+```
+
+---
+
+# 17. ADMINISTRATION DES RECETTES
+
+Une recette est liée à un produit.
+
+Structure :
+
+```text
+Produit
+│
+├── Ingrédient A → quantité
+├── Ingrédient B → quantité
+└── Ingrédient C → quantité
+```
+
+L'administration doit pouvoir :
+
+* créer une recette ;
+* ajouter un ingrédient ;
+* modifier une quantité ;
+* supprimer un ingrédient ;
+* calculer le coût théorique.
+
+---
+
+# 18. COÛT THÉORIQUE
+
+Le coût d'un produit doit être calculable à partir des ingrédients.
+
+Formule :
+
+```text
+Coût recette =
+Σ (quantité utilisée × coût unitaire)
+```
+
+Le système doit conserver les unités cohérentes avant calcul.
+
+---
+
+# 19. ADMINISTRATION DU STOCK
+
+La page Stock doit afficher :
+
+```text
+Ingrédient
+Stock actuel
+Unité
+Seuil minimum
+État
+```
+
+États :
+
+```text
+NORMAL
+ALERTE
+ÉPUISÉ
+```
+
+---
+
+# 20. MOUVEMENTS DE STOCK
+
+Chaque mouvement doit comporter :
+
+```text
+id
+ingredient_id
+type
+quantity
+unit
+before_quantity
+after_quantity
+reason
+user_id
+created_at
+```
+
+Types :
+
+```text
+PURCHASE
+RESTOCK
+CONSUMPTION
+ADJUSTMENT
+WASTE
+RETURN
+```
+
+Le système doit permettre de retrouver l'origine d'une modification.
+
+---
+
+# 21. RÉAPPROVISIONNEMENT
+
+L'administration peut enregistrer une entrée :
+
+```text
+Ingrédient
+Quantité
+Coût
+Fournisseur
+Référence
+Date
+Motif
+```
+
+Le stock est recalculé côté serveur.
+
+---
+
+# 22. CONSOMMATION
+
+La consommation liée à une commande doit être calculée à partir de la recette.
+
+Le système doit empêcher une consommation multiple accidentelle pour la même opération.
+
+Les opérations critiques de stock doivent être transactionnelles.
+
+---
+
+# 23. ADMINISTRATION FOURNISSEURS
+
+Fiche fournisseur :
+
+* nom ;
+* téléphone ;
+* email ;
+* adresse ;
+* contact ;
+* statut ;
+* notes.
+
+Historique :
+
+* achats ;
+* ingrédients ;
+* quantités ;
+* coûts ;
+* dates.
+
+---
+
+# 24. ADMINISTRATION DES LIVREURS
+
+## Liste
+
+Afficher :
+
+```text
+Nom
+Téléphone
+Statut
+Véhicule
+Livraisons actives
+Livraisons du jour
+Montant à encaisser
+Actions
+```
+
+## Actions
+
+* créer ;
+* modifier ;
+* désactiver ;
+* réactiver ;
+* suspendre ;
+* consulter ;
+* modifier accès selon permission ;
+* consulter historique.
+
+---
+
+# 25. COMPTE LIVREUR
+
+La création d'un livreur doit pouvoir générer/configurer son compte.
+
+Informations :
+
+* identité ;
+* téléphone ;
+* identifiant de connexion ;
+* mot de passe initial ;
+* statut ;
+* véhicule.
+
+Le mot de passe doit être stocké uniquement sous forme de hash.
+
+---
+
+# 26. ADMINISTRATION DE LA FLOTTE
+
+La fiche véhicule doit contenir :
+
+* identifiant ;
+* immatriculation ;
+* type ;
+* modèle ;
+* statut ;
+* livreur affecté ;
+* informations administratives nécessaires.
+
+Statuts :
+
+```text
+AVAILABLE
+ASSIGNED
+MAINTENANCE
+INACTIVE
+```
+
+---
+
+# 27. INTERFACE LIVREUR
+
+Le livreur voit uniquement ses missions.
+
+Pour chaque mission :
+
+```text
+Commande
+Client
+Téléphone
+Adresse
+Montant à encaisser
+Statut
+```
+
+Actions selon statut :
+
+```text
+Accepter / prendre en charge
+Démarrer livraison
+Ouvrir navigation
+Confirmer livraison
+Confirmer encaissement
+```
+
+---
+
+# 28. LIVRAISON ET ENCAISSEMENT
+
+Ces deux événements restent indépendants.
+
+Exemple valide :
+
+```text
+order_status = delivered
+payment_status = to_collect
+```
+
+Le statut de paiement ne doit devenir :
+
+```text
+paid
+```
+
+qu'après confirmation réelle de l'encaissement.
+
+---
+
+# 29. TABLEAU LIVREUR
+
+Indicateurs :
+
+```text
+LIVRÉES AUJOURD'HUI
+ENCAISSÉES AUJOURD'HUI
+À ENCAISSER
+```
+
+Les montants doivent être calculés à partir des données serveur.
+
+---
+
+# 30. SUIVI GPS TEMPS RÉEL
+
+## Déclenchement
+
+Le GPS est activé lorsque le livreur commence effectivement une livraison.
+
+Condition :
+
+```text
+order_status = delivering
+```
+
+et :
+
+```text
+assignedDriverId = driver connecté
+```
+
+---
+
+# 31. AUTORISATION GPS
+
+Le livreur doit explicitement autoriser l'accès à la localisation de son appareil.
+
+Si l'autorisation est refusée :
+
+* la livraison doit rester identifiable ;
+* le système doit indiquer que le GPS n'est pas disponible ;
+* aucune fausse position ne doit être générée.
+
+---
+
+# 32. DONNÉES GPS
+
+Chaque position peut contenir :
+
+```text
+latitude
+longitude
+accuracy
+speed
+heading
+timestamp
+driver_id
+order_id
+```
+
+Le serveur vérifie :
+
+* coordonnées valides ;
+* utilisateur authentifié ;
+* livreur affecté ;
+* commande active ;
+* fréquence acceptable.
+
+---
+
+# 33. GOOGLE MAPS
+
+La page client de suivi doit intégrer Google Maps.
+
+Elle doit afficher :
+
+```text
+🚚 Position du livreur
+
+        ↓
+
+     itinéraire
+
+        ↓
+
+📍 Adresse de livraison
+```
+
+La position doit être mise à jour sans rechargement manuel de la page.
+
+---
+
+# 34. CARTE ADMINISTRATION
+
+L'administration doit pouvoir voir les livraisons actuellement actives sur une carte.
+
+Pour chaque livraison :
+
+* commande ;
+* livreur ;
+* statut ;
+* dernière position ;
+* heure de dernière mise à jour.
+
+L'administration peut sélectionner une livraison pour afficher ses détails.
+
+---
+
+# 35. FIN DU SUIVI GPS
+
+Le partage GPS doit être arrêté lorsque la livraison est terminée.
+
+Condition :
+
+```text
+order_status = delivered
+```
+
+La dernière position peut être conservée selon la politique de rétention définie.
+
+---
+
+# 36. ABSENCE DE SIGNAL GPS
+
+Si aucune nouvelle position n'arrive :
+
+```text
+Dernière position reçue :
+il y a X minutes
+```
+
+Le système ne doit jamais afficher cette position comme si elle était actuelle.
+
+---
+
+# 37. RÉCLAMATIONS
+
+Une réclamation doit obligatoirement être liée à une commande.
+
+Structure :
+
+```text
+Claim
+│
+├── Client
+├── Commande
+├── Motif
+├── Description
+├── Photos
+├── Messages
+├── Statut
+└── Historique
+```
+
+---
+
+# 38. CRÉATION D'UNE RÉCLAMATION
+
+Le client doit pouvoir :
+
+1. ouvrir sa commande ;
+2. sélectionner « Réclamation » ;
+3. choisir le motif ;
+4. saisir une description ;
+5. ajouter une ou plusieurs photos ;
+6. envoyer.
+
+---
+
+# 39. MOTIFS
+
+Liste configurable comprenant au minimum :
+
+```text
+Produit incorrect
+Produit manquant
+Quantité incorrecte
+Produit endommagé
+Problème de qualité
+Commande incomplète
+Problème de livraison
+Problème de paiement
+Autre
+```
+
+---
+
+# 40. PRISE DE PHOTO
+
+Sur mobile :
+
+```text
+Prendre une photo
+Choisir depuis la galerie
+```
+
+Sur ordinateur :
+
+```text
+Choisir un fichier
+```
+
+Formats :
+
+```text
+JPEG
+PNG
+WEBP
+```
+
+Limites configurables :
+
+* nombre maximal de photos ;
+* taille maximale par fichier ;
+* taille totale.
+
+---
+
+# 41. VALIDATION DES PHOTOS
+
+Le serveur doit contrôler :
+
+* authentification ;
+* propriétaire de la réclamation ;
+* type MIME ;
+* extension ;
+* taille ;
+* nombre ;
+* contenu attendu ;
+* nom de fichier généré côté serveur.
+
+Les fichiers ne doivent pas pouvoir exécuter du code.
+
+---
+
+# 42. STOCKAGE DES PHOTOS
+
+Les photos doivent être stockées dans un système de stockage de fichiers/objets.
+
+La base de données conserve :
+
+```text
+attachment_id
+claim_id
+storage_key
+filename
+mime_type
+size
+created_at
+```
+
+Les photos doivent être privées par défaut.
+
+---
+
+# 43. CHAT DES RÉCLAMATIONS
+
+Le chat est exclusivement attaché à une réclamation.
+
+Il ne doit pas devenir une messagerie générale du site.
+
+Relation :
+
+```text
+Réclamation
+      ↓
+Conversation
+      ↓
+Client ↔ Administration
+```
+
+---
+
+# 44. INTERDICTION DU CHAT HORS RÉCLAMATION
+
+Le client ne doit pas disposer d'un bouton général :
+
+```text
+Chat avec l'administration
+```
+
+hors contexte de réclamation.
+
+Le chat apparaît dans :
+
+```text
+Mes commandes
+→ Réclamation
+→ Conversation
+```
+
+---
+
+# 45. MESSAGES
+
+Chaque message doit comporter :
+
+```text
+id
+claim_id
+sender_id
+sender_role
+message
+attachments
+created_at
+read_at
+```
+
+Les rôles autorisés sont :
+
+```text
+CLIENT
+ADMIN
+```
+
+---
+
+# 46. PIÈCES JOINTES DU CHAT
+
+Le chat peut permettre des photos complémentaires.
+
+Elles doivent suivre les mêmes règles de sécurité que les pièces jointes de réclamation.
+
+---
+
+# 47. TEMPS RÉEL DU CHAT
+
+Lorsqu'un message est envoyé :
+
+```text
+Client
+↓
+Backend
+↓
+Administration
+```
+
+ou :
+
+```text
+Administration
+↓
+Backend
+↓
+Client
+```
+
+Le nouveau message doit apparaître sans nécessiter un rechargement manuel lorsque la connexion temps réel est disponible.
+
+---
+
+# 48. STATUTS DES RÉCLAMATIONS
+
+```text
+OPEN
+IN_REVIEW
+WAITING_FOR_CUSTOMER
+RESOLVED
+CLOSED
+```
+
+Transitions :
+
+```text
+OPEN
+ ↓
+IN_REVIEW
+ ↓
+WAITING_FOR_CUSTOMER
+ ↓
+IN_REVIEW
+ ↓
+RESOLVED
+ ↓
+CLOSED
+```
+
+L'administration peut appliquer les transitions autorisées.
+
+---
+
+# 49. TRAITEMENT ADMINISTRATIF
+
+La fiche réclamation doit afficher :
+
+* numéro ;
+* commande ;
+* client ;
+* téléphone ;
+* date ;
+* motif ;
+* description ;
+* photos ;
+* messages ;
+* statut ;
+* historique.
+
+Actions :
+
+```text
+Prendre en charge
+Répondre
+Demander information
+Changer statut
+Résoudre
+Fermer
+```
+
+---
+
+# 50. RÉSOLUTION
+
+L'administration doit pouvoir enregistrer :
+
+```text
+Type de résolution
+Description
+Administrateur
+Date
+```
+
+Types configurables :
+
+```text
+Aucune action
+Remplacement
+Avoir
+Geste commercial
+Remboursement
+Autre
+```
+
+---
+
+# 51. HISTORIQUE DE RÉCLAMATION
+
+Le système conserve :
+
+```text
+Création
+Changement statut
+Ajout photo
+Message
+Réponse admin
+Demande d'information
+Résolution
+Fermeture
+```
+
+Chaque événement contient :
+
+```text
+acteur
+date/heure
+action
+données pertinentes
+```
+
+---
+
+# 52. NOTIFICATIONS RÉCLAMATION
+
+Client :
+
+* réclamation créée ;
+* réponse administration ;
+* nouveau message ;
+* demande d'information ;
+* réclamation résolue.
+
+Administration :
+
+* nouvelle réclamation ;
+* nouveau message ;
+* réponse client.
+
+---
+
+# 53. PERMISSIONS
+
+## CLIENT
+
+Peut :
+
+* voir ses données ;
+* voir ses commandes ;
+* créer ses commandes ;
+* voir ses commandes ;
+* créer une réclamation pour ses commandes autorisées ;
+* envoyer des messages dans ses réclamations ;
+* ajouter ses photos ;
+* voir le suivi de ses commandes ;
+* voir le GPS d'une livraison qui lui appartient.
+
+Ne peut pas :
+
+* voir les autres clients ;
+* voir les autres commandes ;
+* voir les données internes ;
+* voir les autres réclamations ;
+* voir les positions GPS d'autres commandes.
+
+---
+
+# 54. CUISINE
+
+Peut :
+
+* voir les commandes destinées à la préparation ;
+* modifier les statuts de préparation autorisés ;
+* consulter les informations nécessaires à la production.
+
+Ne peut pas :
+
+* modifier paiement ;
+* gérer livreurs ;
+* gérer utilisateurs ;
+* consulter les réclamations administratives sauf autorisation spécifique ;
+* modifier les paramètres globaux.
+
+---
+
+# 55. LIVREUR
+
+Peut :
+
+* voir ses missions ;
+* consulter les informations nécessaires à ses livraisons ;
+* mettre à jour les statuts autorisés ;
+* envoyer sa position pendant une livraison active ;
+* confirmer livraison ;
+* confirmer encaissement ;
+* consulter ses statistiques.
+
+Ne peut pas :
+
+* voir les missions d'autres livreurs ;
+* modifier les prix ;
+* gérer le stock ;
+* gérer les utilisateurs ;
+* accéder aux réclamations administratives ;
+* modifier une commande qui ne lui appartient pas.
+
+---
+
+# 56. ADMINISTRATION
+
+Le Super Administrateur dispose de l'ensemble des droits définis dans le système.
+
+Les permissions doivent néanmoins être contrôlées côté backend et non uniquement masquées dans l'interface.
+
+---
+
+# 57. MATRICE DE PERMISSIONS
+
+Le système doit disposer d'une matrice explicite :
+
+```text
+                    CLIENT  CUISINE  LIVREUR  ADMIN
+Commandes             own      read      own      all
+Produits              read     read      read     CRUD
+Cuisine               -        CRUD       -       all
+Clients               own       -         -       all
+Ingrédients            -        read       -       CRUD
+Recettes               -        read       -       CRUD
+Stock                  -         -        -       CRUD
+Livreurs               -         -        own      CRUD
+Véhicules              -         -        -       CRUD
+GPS                    own       -        own      all
+Réclamations           own       -         -       all
+Chat                   own       -         -       all
+Paiements              own       -        own      all
+Utilisateurs            -         -         -       CRUD
+Audit                   -         -         -       read
+Paramètres              -         -         -       CRUD
+```
+
+`own` signifie uniquement les ressources appartenant à l'utilisateur.
+
+---
+
+# 58. PROTECTION DES RESSOURCES
+
+Toute API manipulant une ressource doit effectuer :
+
+```text
+Authentification
+↓
+Vérification du rôle
+↓
+Vérification de propriété
+↓
+Vérification de l'état
+↓
+Action
+```
+
+Exemple :
+
+Un livreur ne doit pas pouvoir modifier :
+
+```text
+/order/123
+```
+
+simplement parce qu'il connaît l'identifiant.
+
+Le serveur doit vérifier que la commande lui est affectée.
+
+---
+
+# 59. TRACKING TOKEN
+
+Le token de suivi doit être :
+
+* généré côté serveur ;
+* suffisamment aléatoire ;
+* unique ;
+* non prédictible ;
+* associé à une seule commande.
+
+Format cible :
+
+```text
+8 caractères
+```
+
+La consultation par token doit toujours respecter les données autorisées à l'exposition publique.
+
+---
+
+# 60. API
+
+Les routes doivent être organisées par domaine :
+
+```text
+/api/auth
+/api/users
+/api/clients
+/api/products
+/api/categories
+/api/options
+/api/ingredients
+/api/recipes
+/api/stock
+/api/suppliers
+/api/orders
+/api/payments
+/api/drivers
+/api/vehicles
+/api/deliveries
+/api/tracking
+/api/claims
+/api/claims/:id/messages
+/api/notifications
+/api/statistics
+/api/audit
+/api/settings
+```
+
+---
+
+# 61. RÈGLE API
+
+Chaque route doit définir :
+
+* méthode HTTP ;
+* authentification ;
+* rôles autorisés ;
+* paramètres ;
+* corps de requête ;
+* validation ;
+* réponse ;
+* erreurs ;
+* effets sur la base ;
+* événements éventuels ;
+* journalisation.
+
+---
+
+# 62. ERREURS API
+
+Les erreurs doivent être structurées.
+
+Exemple :
+
+```text
+400
+Données invalides
+
+401
+Non authentifié
+
+403
+Action interdite
+
+404
+Ressource inexistante
+
+409
+Conflit métier
+
+422
+Données non conformes
+
+500
+Erreur serveur
+```
+
+Le frontend ne doit pas dépendre de messages d'erreur non structurés.
+
+---
+
+# 63. TRANSACTIONS
+
+Les opérations nécessitant plusieurs modifications liées doivent être transactionnelles.
+
+Exemples :
+
+### Commande
+
+```text
+Création commande
++
+items
++
+total
++
+état initial
+```
+
+### Stock
+
+```text
+consommation
++
+mouvement stock
++
+mise à jour stock
+```
+
+### Affectation
+
+```text
+commande
++
+livreur
++
+historique
+```
+
+### Paiement
+
+```text
+paiement
++
+commande
++
+historique
+```
+
+---
+
+# 64. IDEMPOTENCE
+
+Les opérations sensibles doivent éviter les doubles traitements.
+
+Exemple :
+
+Un clic répété sur :
+
+```text
+Confirmer encaissement
+```
+
+ne doit pas créer deux paiements.
+
+Même principe pour :
+
+* consommation stock ;
+* création commande ;
+* affectation ;
+* livraison ;
+* résolution.
+
+---
+
+# 65. JOURNAL D'AUDIT
+
+Table logique :
+
+```text
+audit_logs
+```
+
+Données :
+
+```text
+id
+actor_id
+actor_role
+action
+resource_type
+resource_id
+before
+after
+ip
+user_agent
+created_at
+```
+
+Les actions sensibles doivent être journalisées.
+
+---
+
+# 66. SÉCURITÉ DES PHOTOS ET FICHIERS
+
+Les utilisateurs ne doivent pas pouvoir accéder aux fichiers privés simplement en devinant leur URL.
+
+Les accès doivent être contrôlés.
+
+Un client A ne doit jamais pouvoir récupérer une photo de la réclamation du client B.
+
+---
+
+# 67. SÉCURITÉ GPS
+
+Le GPS doit être associé à :
+
+```text
+driver_id
+order_id
+```
+
+Le serveur doit vérifier que le livreur est réellement affecté à la commande.
+
+Une requête GPS provenant d'un autre utilisateur doit être rejetée.
+
+---
+
+# 68. DONNÉES GPS ET CLIENT
+
+Le client ne reçoit que les informations nécessaires au suivi de sa propre commande.
+
+Il ne reçoit pas :
+
+* historique global du livreur ;
+* autres commandes ;
+* autres clients ;
+* informations internes.
+
+---
+
+# 69. NOTIFICATIONS SYSTÈME
+
+Événements principaux :
+
+```text
+ORDER_CREATED
+ORDER_PREPARING
+ORDER_READY
+DRIVER_ASSIGNED
+DELIVERY_STARTED
+DRIVER_LOCATION_UPDATED
+ORDER_DELIVERED
+PAYMENT_RECEIVED
+CLAIM_CREATED
+CLAIM_MESSAGE_RECEIVED
+CLAIM_RESOLVED
+```
+
+Les notifications doivent être déclenchées côté backend.
+
+---
+
+# 70. STATISTIQUES ADMINISTRATION
+
+Prévoir :
+
+## Commandes
+
+* nombre ;
+* montant ;
+* panier moyen ;
+* annulations ;
+* répartition par statut.
+
+## Produits
+
+* ventes par produit ;
+* ventes par catégorie.
+
+## Livraison
+
+* nombre ;
+* temps moyen ;
+* livraisons par livreur.
+
+## Paiements
+
+* encaissé ;
+* restant à encaisser.
+
+## Stock
+
+* consommation ;
+* pertes ;
+* ingrédients critiques.
+
+## Réclamations
+
+* nombre ;
+* motifs ;
+* statut ;
+* délai moyen de traitement.
+
+---
+
+# 71. RECHERCHE ET FILTRES
+
+Les interfaces administratives doivent proposer des filtres adaptés.
+
+Les filtres doivent fonctionner côté serveur lorsque les volumes de données deviennent importants.
+
+Pagination obligatoire pour les listes volumineuses.
+
+---
+
+# 72. RESPONSIVE ADMINISTRATION
+
+L'administration doit être utilisable :
+
+* ordinateur ;
+* tablette.
+
+L'interface livreur doit être optimisée pour téléphone.
+
+L'interface cuisine doit être optimisée pour tablette/ordinateur.
+
+---
+
+# 73. ÉTATS DE CHARGEMENT
+
+Chaque écran doit prévoir :
+
+```text
+Chargement
+Données disponibles
+Aucune donnée
+Erreur
+```
+
+Une page vide ne doit pas être confondue avec :
+
+```text
+erreur de chargement
+```
+
+---
+
+# 74. GESTION DES ERREURS FRONTEND
+
+Le frontend doit afficher des messages compréhensibles.
+
+Exemples :
+
+```text
+Impossible de charger les commandes.
+Réessayez.
+
+Impossible d'enregistrer l'encaissement.
+La commande a peut-être déjà été traitée.
+
+Position GPS indisponible.
+La dernière position connue est affichée.
+```
+
+---
+
+# 75. CONNEXION TEMPS RÉEL
+
+Les fonctionnalités temps réel sont :
+
+```text
+GPS
+Chat
+Notifications
+Mise à jour de certaines commandes
+```
+
+Une perte temporaire de connexion ne doit pas corrompre les données.
+
+---
+
+# 76. RECONNEXION
+
+Après perte réseau :
+
+* reconnexion automatique ;
+* resynchronisation ;
+* récupération des événements manqués ;
+* absence de doublons.
+
+---
+
+# 77. BASE DE DONNÉES — COMPLÉMENT
+
+Le modèle doit au minimum couvrir :
+
+```text
+users
+roles
+permissions
+clients
+addresses
+
+categories
+products
+product_options
+
+ingredients
+recipes
+recipe_items
+
+suppliers
+stock
+stock_movements
+
+orders
+order_items
+order_item_options
+
+payments
+
+drivers
+vehicles
+driver_assignments
+driver_locations
+
+notifications
+
+claims
+claim_attachments
+claim_messages
+claim_events
+
+audit_logs
+settings
+```
+
+---
+
+# 78. CONTRAINTES BASE DE DONNÉES
+
+Prévoir :
+
+* clés primaires ;
+* clés étrangères ;
+* contraintes d'unicité ;
+* contraintes de non-nullité ;
+* index ;
+* contraintes de statut ;
+* intégrité référentielle.
+
+Exemples d'unicité :
+
+```text
+numéro de téléphone client
+tracking token
+numéro de commande
+immatriculation véhicule
+```
+
+selon les règles métier applicables.
+
+---
+
+# 79. SUPPRESSION DES DONNÉES
+
+Il faut distinguer :
+
+```text
+Suppression physique
+```
+
+et :
+
+```text
+Désactivation / archivage
+```
+
+Les données nécessaires à l'historique des commandes, paiements, stocks, livraisons et réclamations ne doivent pas être détruites par une suppression administrative ordinaire.
+
+---
+
+# 80. ARCHIVAGE
+
+Prévoir l'archivage des anciennes données lorsque nécessaire.
+
+Une commande terminée doit rester consultable dans l'historique.
+
+Une réclamation fermée doit rester consultable selon la politique de conservation.
+
+---
+
+# 81. SAUVEGARDE
+
+Prévoir :
+
+* sauvegarde base ;
+* sauvegarde fichiers ;
+* sauvegarde photos ;
+* procédure de restauration ;
+* vérification périodique des sauvegardes.
+
+Une sauvegarde non testée ne doit pas être considérée comme une procédure de restauration validée.
+
+---
+
+# 82. TESTS ADMINISTRATION
+
+Tester séparément :
+
+### Super Admin
+
+Toutes les fonctions autorisées.
+
+### Cuisine
+
+Uniquement les fonctions autorisées.
+
+### Livreur
+
+Uniquement ses commandes.
+
+### Client
+
+Uniquement ses données.
+
+---
+
+# 83. TESTS GPS
+
+Scénarios :
+
+1. livreur connecté ;
+2. commande affectée ;
+3. livraison démarrée ;
+4. permission GPS acceptée ;
+5. position envoyée ;
+6. client ouvre suivi ;
+7. position visible ;
+8. position actualisée ;
+9. GPS interrompu ;
+10. dernière position indiquée ;
+11. livraison terminée ;
+12. GPS arrêté.
+
+---
+
+# 84. TESTS RÉCLAMATION
+
+Scénario complet :
+
+```text
+Client
+↓
+Commande livrée
+↓
+Créer réclamation
+↓
+Choisir motif
+↓
+Description
+↓
+Prendre photo
+↓
+Envoyer
+↓
+Administration reçoit
+↓
+Admin ouvre
+↓
+Admin répond
+↓
+Client reçoit message
+↓
+Client répond
+↓
+Admin résout
+↓
+Client voit résolution
+↓
+Réclamation fermée
+```
+
+---
+
+# 85. TESTS DE SÉCURITÉ RÉCLAMATION
+
+Tester notamment :
+
+* client A tente d'accéder à la réclamation de B ;
+* client A tente de télécharger une photo de B ;
+* client A tente d'envoyer un message dans la réclamation de B ;
+* livreur tente d'accéder à une réclamation ;
+* utilisateur non authentifié tente d'accéder au chat.
+
+Toutes les tentatives non autorisées doivent être refusées.
+
+---
+
+# 86. TESTS DE SÉCURITÉ GPS
+
+Tester :
+
+* livreur A tente d'envoyer la position pour la commande du livreur B ;
+* client A tente de consulter le GPS de la commande B ;
+* utilisateur non connecté tente d'obtenir une position ;
+* livreur tente d'envoyer une position alors qu'il n'est pas en livraison.
+
+---
+
+# 87. TEST COMPLET DE BOUT EN BOUT
+
+Le scénario d'acceptation final doit être :
+
+```text
+CLIENT
+↓
+Création compte
+↓
+Carte
+↓
+Produit
+↓
+Personnalisation
+↓
+Panier
+↓
+Commande COD
+↓
+CUISINE
+↓
+Préparation
+↓
+Commande prête
+↓
+ADMIN
+↓
+Affectation livreur
+↓
+LIVREUR
+↓
+Début livraison
+↓
+GPS
+↓
+CLIENT
+↓
+Google Maps + position temps réel
+↓
+Livraison
+↓
+Encaissement
+↓
+Commande livrée
+↓
+GPS arrêté
+↓
+CLIENT
+↓
+Réclamation
+↓
+Photo
+↓
+ADMIN
+↓
+Chat
+↓
+Résolution
+```
+
+Ce scénario doit fonctionner sans intervention technique manuelle dans la base de données.
+
+---
+
+# 88. CRITÈRE « TERMINÉ »
+
+Une fonctionnalité ne doit pas être considérée comme terminée uniquement parce que :
+
+* l'écran existe ;
+* le bouton existe ;
+* le build passe ;
+* aucune erreur visuelle n'apparaît.
+
+Elle doit être considérée terminée lorsque :
+
+```text
+Interface
++
+API
++
+Base de données
++
+Permissions
++
+Règles métier
++
+Gestion erreurs
++
+Persistance
++
+Tests
+```
+
+fonctionnent ensemble.
+
+---
+
+# 89. RÈGLE DE VALIDATION DU PROJET
+
+Pour chaque module :
+
+```text
+SPÉCIFICATION
+↓
+DÉVELOPPEMENT
+↓
+TEST
+↓
+VÉRIFICATION DES DONNÉES
+↓
+VÉRIFICATION DES PERMISSIONS
+↓
+TEST DU PARCOURS COMPLET
+↓
+VALIDATION
+```
+
+Une fonctionnalité non testée de bout en bout ne doit pas être déclarée validée.
+
+---
+
+# 90. ORDRE DE CONSTRUCTION
+
+Le développement doit respecter cet ordre :
+
+```text
+BLOC 0
+Architecture
+Base technique
+Sécurité
+
+BLOC 1
+Base de données
+
+BLOC 2
+Authentification / rôles
+
+BLOC 3
+Produits / catégories / options
+
+BLOC 4
+Ingrédients / recettes / stock
+
+BLOC 5
+Panier
+
+BLOC 6
+Commandes
+
+BLOC 7
+Cuisine
+
+BLOC 8
+Clients
+
+BLOC 9
+Livreurs / véhicules
+
+BLOC 10
+Affectation / livraison / encaissement
+
+BLOC 11
+Suivi commande
+
+BLOC 12
+GPS / Google Maps / temps réel
+
+BLOC 13
+Réclamations
+
+BLOC 14
+Photos
+
+BLOC 15
+Chat réclamation
+
+BLOC 16
+Notifications
+
+BLOC 17
+Dashboard / statistiques
+
+BLOC 18
+Audit / sécurité
+
+BLOC 19
+Tests E2E
+
+BLOC 20
+Déploiement / sauvegardes
+```
+
+---
+
+# 91. RÈGLE DE NON-RÉGRESSION
+
+Une modification d'un module ne doit pas casser les autres.
+
+Exemples :
+
+* modification produit → ne doit pas casser panier ;
+* modification recette → ne doit pas casser stock ;
+* modification livreur → ne doit pas casser affectation ;
+* modification livraison → ne doit pas casser paiement ;
+* modification GPS → ne doit pas casser suivi commande ;
+* modification réclamation → ne doit pas casser commande ;
+* modification chat → ne doit pas permettre un chat hors réclamation.
+
+---
+
+# 92. LIVRABLES TECHNIQUES
+
+Le projet final doit comprendre au minimum :
+
+```text
+Code source frontend
+Code source backend
+Schéma base de données
+Migrations
+Seed / données initiales
+API documentée
+Variables d'environnement d'exemple
+Configuration stockage
+Configuration temps réel
+Configuration Google Maps
+Tests
+Documentation installation
+Documentation déploiement
+Documentation sauvegarde/restauration
+Documentation rôles/permissions
+```
+
+---
+
+# 93. DOCUMENTATION
+
+La documentation doit permettre à un autre développeur de comprendre :
+
+* architecture ;
+* installation ;
+* configuration ;
+* base de données ;
+* API ;
+* authentification ;
+* rôles ;
+* workflow commandes ;
+* stock ;
+* livraison ;
+* GPS ;
+* réclamations ;
+* chat ;
+* déploiement.
+
+---
+
+# 94. CONDITIONS FINALES D'ACCEPTATION
+
+BEBBA sera considéré techniquement conforme lorsque les conditions suivantes seront simultanément respectées :
+
+### Client
+
+* inscription fonctionnelle ;
+* commande fonctionnelle ;
+* suivi fonctionnel ;
+* GPS fonctionnel pendant livraison ;
+* réclamation fonctionnelle ;
+* photo fonctionnelle ;
+* chat fonctionnel.
+
+### Cuisine
+
+* réception commandes ;
+* préparation ;
+* déclaration prêt.
+
+### Livreur
+
+* connexion ;
+* missions ;
+* livraison ;
+* GPS ;
+* encaissement.
+
+### Administration
+
+* supervision complète ;
+* gestion commandes ;
+* cuisine ;
+* clients ;
+* produits ;
+* ingrédients ;
+* recettes ;
+* stock ;
+* fournisseurs ;
+* livreurs ;
+* véhicules ;
+* paiements ;
+* GPS ;
+* réclamations ;
+* chat ;
+* statistiques ;
+* utilisateurs ;
+* audit.
+
+### Sécurité
+
+* authentification ;
+* RBAC ;
+* contrôle de propriété ;
+* validation backend ;
+* protection fichiers ;
+* protection GPS ;
+* journalisation.
+
+### Intégrité
+
+* aucune double consommation ;
+* aucun double paiement ;
+* aucune double livraison ;
+* aucune affectation incohérente ;
+* aucun accès inter-utilisateur ;
+* aucune transition de statut interdite.
+
+---
+
+# 95. RÉFÉRENCE CONTRACTUELLE
+
+Le cahier des charges initial et le présent complément doivent être considérés ensemble.
+
+```text
+CAHIER DES CHARGES INITIAL
+          +
+PRÉSENT CAHIER DES CHARGES COMPLÉMENTAIRE
+          =
+SPÉCIFICATION BEBBA
+```
+
+En cas de développement, aucune fonctionnalité ne doit être supprimée, simplifiée ou remplacée par une interprétation sans modification explicite de la spécification.
+
+Le développement doit respecter les règles métier, les rôles, les permissions, les statuts, les flux de données et les critères d'acceptation définis dans les deux documents.
