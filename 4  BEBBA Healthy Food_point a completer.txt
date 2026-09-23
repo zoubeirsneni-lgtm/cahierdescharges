@@ -1,0 +1,1343 @@
+# BEBBA Healthy Food
+
+## Cahier des charges technique — À compléter
+
+**Slogan officiel : « Vos Plats santé en un clic »**
+
+---
+
+## STATUT DU DOCUMENT
+
+Ce document constitue le **troisième cahier des charges** du projet BEBBA Healthy Food.
+
+Il est **complémentaire** aux deux cahiers des charges précédents.
+
+Il ne les remplace pas.
+
+Il ne supprime aucune règle, fonctionnalité, contrainte ou exigence déjà définie.
+
+Son objectif exclusif est de **compléter les éléments identifiés comme manquants ou insuffisamment détaillés** dans les deux documents précédents.
+
+---
+
+# 1. OBJET DU COMPLÉMENT
+
+Le présent document précise les règles complémentaires nécessaires pour que l'ensemble du projet BEBBA Healthy Food puisse être construit sans laisser de zone fonctionnelle importante non définie.
+
+Il couvre notamment :
+
+* parcours invité ;
+* adresses ;
+* livraison ;
+* promotions ;
+* produits ;
+* panier ;
+* encaissement ;
+* annulation ;
+* stock ;
+* administration ;
+* permissions ;
+* notifications ;
+* PWA ;
+* fonctionnement hors ligne ;
+* GPS ;
+* Google Maps ;
+* réclamations ;
+* photos ;
+* chat ;
+* conservation des données ;
+* RGPD ;
+* déploiement ;
+* CI/CD ;
+* monitoring ;
+* logs ;
+* rate limiting ;
+* tests.
+
+---
+
+# 2. PARCOURS DE COMMANDE INVITÉ
+
+## 2.1 Commande sans compte
+
+Le système doit permettre à un visiteur de passer une commande sans créer obligatoirement un compte.
+
+Le parcours doit permettre :
+
+1. consultation du catalogue ;
+2. sélection d'un produit ;
+3. sélection des options ;
+4. ajout au panier ;
+5. modification du panier ;
+6. saisie des coordonnées ;
+7. saisie de l'adresse ;
+8. validation ;
+9. création de la commande ;
+10. génération du suivi ;
+11. affichage du récapitulatif ;
+12. suivi de la commande.
+
+## 2.2 Données obligatoires
+
+Une commande invitée doit disposer au minimum de :
+
+* numéro de téléphone ;
+* adresse de livraison ;
+* contenu de commande ;
+* quantités ;
+* prix ;
+* frais de livraison ;
+* total ;
+* mode de paiement ;
+* statut de commande ;
+* statut d'encaissement.
+
+## 2.3 Création de compte après commande
+
+Le client invité peut être invité à créer un compte après sa commande.
+
+La création d'un compte ne doit pas modifier la commande déjà créée.
+
+## 2.4 Identifiant client
+
+Le client ne choisit pas son identifiant.
+
+L'identifiant client est généré à partir du numéro de téléphone international complet.
+
+Le numéro doit être normalisé sans :
+
+* signe `+` ;
+* espaces ;
+* séparateurs.
+
+Exemple :
+
+`+216 98123456`
+
+devient :
+
+`0021698123456`.
+
+Un numéro international complet ne peut correspondre qu'à un seul client.
+
+---
+
+# 3. GESTION COMPLÈTE DES ADRESSES
+
+## 3.1 Données d'adresse
+
+Une adresse doit pouvoir contenir :
+
+* pays ;
+* gouvernorat ;
+* ville ;
+* zone ;
+* adresse ;
+* complément ;
+* bâtiment ;
+* étage ;
+* appartement ;
+* indications d'accès ;
+* latitude ;
+* longitude ;
+* libellé.
+
+## 3.2 Plusieurs adresses
+
+Un client connecté peut enregistrer plusieurs adresses.
+
+Une adresse peut être définie comme adresse principale.
+
+## 3.3 Adresse d'une commande
+
+La commande doit conserver les données de l'adresse utilisées lors de sa création.
+
+Une modification ultérieure du carnet d'adresses ne doit pas modifier une ancienne commande.
+
+## 3.4 Validation
+
+Les champs obligatoires doivent être contrôlés côté serveur.
+
+---
+
+# 4. FRAIS DE LIVRAISON
+
+## 4.1 Principe
+
+Les frais de livraison ne sont pas systématiquement gratuits.
+
+Ils doivent être déterminés par les règles commerciales configurées.
+
+## 4.2 Données utilisées
+
+Le calcul peut dépendre notamment de :
+
+* zone ;
+* distance ;
+* adresse ;
+* montant de commande ;
+* seuil de gratuité ;
+* règle commerciale.
+
+## 4.3 Calcul serveur
+
+Le montant final doit être calculé et vérifié côté serveur.
+
+Le client ne peut pas imposer son propre montant.
+
+## 4.4 Conservation
+
+La commande doit conserver :
+
+* montant produits ;
+* frais de livraison ;
+* remise éventuelle ;
+* total final.
+
+Une modification ultérieure du tarif de livraison ne doit pas modifier les anciennes commandes.
+
+---
+
+# 5. PROMOTIONS ET AVANTAGES COMMERCIAUX
+
+## 5.1 Administration
+
+L'administration doit pouvoir :
+
+* créer ;
+* modifier ;
+* activer ;
+* désactiver ;
+* archiver une promotion.
+
+## 5.2 Données
+
+Une promotion peut comporter :
+
+* nom ;
+* description ;
+* code ;
+* type ;
+* valeur ;
+* période ;
+* nombre maximal d'utilisations ;
+* nombre maximal par client ;
+* montant minimum ;
+* catégories ;
+* produits ;
+* clients concernés ;
+* conditions de cumul ;
+* statut.
+
+## 5.3 Types
+
+Le système doit pouvoir gérer notamment :
+
+* remise fixe ;
+* remise en pourcentage ;
+* livraison gratuite ;
+* avantage lié à la création d'un compte.
+
+## 5.4 Contrôle
+
+Toutes les règles doivent être contrôlées côté serveur.
+
+## 5.5 Historique
+
+La commande doit conserver la promotion effectivement appliquée.
+
+---
+
+# 6. IMAGES DES PRODUITS
+
+## 6.1 Administration
+
+L'administration doit pouvoir :
+
+* ajouter ;
+* remplacer ;
+* supprimer ;
+* définir une image principale ;
+* modifier l'ordre des images.
+
+## 6.2 Sécurité
+
+Les fichiers doivent être contrôlés :
+
+* type ;
+* extension ;
+* taille ;
+* nom ;
+* emplacement.
+
+## 6.3 Affichage
+
+Le frontend doit gérer :
+
+* image disponible ;
+* image absente ;
+* erreur de chargement ;
+* image principale ;
+* galerie éventuelle.
+
+---
+
+# 7. DISPONIBILITÉ DES PRODUITS
+
+## 7.1 États
+
+Un produit peut être :
+
+* disponible ;
+* indisponible ;
+* temporairement indisponible ;
+* archivé.
+
+## 7.2 Produit indisponible
+
+Un produit indisponible ne peut pas être ajouté à une nouvelle commande.
+
+## 7.3 Produit déjà présent dans un panier
+
+Si un produit devient indisponible alors qu'il se trouve dans un panier, le serveur doit le détecter avant la validation.
+
+La commande ne doit pas être créée avec ce produit.
+
+## 7.4 Historique
+
+La désactivation d'un produit ne doit pas modifier les commandes historiques.
+
+---
+
+# 8. PANIER
+
+## 8.1 Persistance
+
+Le panier doit pouvoir être conservé pour :
+
+* un invité ;
+* un client connecté.
+
+## 8.2 Connexion
+
+Lorsqu'un invité se connecte ou crée un compte, le système doit gérer explicitement la fusion ou conservation des paniers.
+
+Il ne doit pas y avoir :
+
+* perte silencieuse ;
+* duplication ;
+* incohérence de quantité.
+
+## 8.3 Revalidation
+
+Avant validation, le serveur doit recalculer :
+
+* produits ;
+* quantités ;
+* options ;
+* prix ;
+* sous-totaux ;
+* promotions ;
+* livraison ;
+* total.
+
+## 8.4 Changement de prix
+
+Si un prix change avant la validation, le serveur utilise le prix actuellement valide.
+
+Le client doit être informé du changement.
+
+## 8.5 Produit supprimé ou indisponible
+
+Le client doit être informé avant validation.
+
+## 8.6 Expiration
+
+Le comportement d'expiration du panier doit être déterministe.
+
+Un panier expiré ne doit pas pouvoir créer une commande.
+
+---
+
+# 9. CYCLE COMPLET DE L'ENCAISSEMENT COD
+
+## 9.1 Principe
+
+Le paiement s'effectue à la livraison.
+
+La livraison et l'encaissement sont deux événements distincts.
+
+## 9.2 États
+
+Le système utilise au minimum :
+
+* `to_collect` ;
+* `paid`.
+
+## 9.3 Livraison sans paiement
+
+Une commande peut être :
+
+`delivered + to_collect`.
+
+Elle ne doit pas être automatiquement considérée comme payée.
+
+## 9.4 Paiement exact
+
+Le montant reçu doit correspondre au montant dû.
+
+## 9.5 Paiement supérieur
+
+Le système doit pouvoir enregistrer :
+
+* montant dû ;
+* montant reçu ;
+* monnaie rendue.
+
+## 9.6 Paiement insuffisant
+
+Un paiement inférieur au montant dû ne doit pas automatiquement passer à `paid`.
+
+## 9.7 Correction
+
+Toute correction doit conserver :
+
+* ancienne valeur ;
+* nouvelle valeur ;
+* auteur ;
+* date ;
+* motif.
+
+## 9.8 Encaissement par administration
+
+Le Super Admin doit pouvoir confirmer l'encaissement lorsqu'il prend en charge cette opération.
+
+## 9.9 Historique
+
+Les opérations financières doivent être historisées.
+
+## 9.10 Idempotence
+
+Une confirmation répétée ne doit pas créer plusieurs encaissements.
+
+---
+
+# 10. ANNULATION ET REMBOURSEMENT
+
+## 10.1 Annulation
+
+Le système doit définir les états permettant l'annulation.
+
+## 10.2 Permissions
+
+Les droits d'annulation dépendent :
+
+* du rôle ;
+* de l'état de la commande.
+
+## 10.3 Avant préparation
+
+L'annulation avant consommation du stock doit être traitée sans créer une consommation définitive.
+
+## 10.4 Après consommation
+
+Si le stock a déjà été consommé, le système applique la règle de restitution définie.
+
+## 10.5 Remboursement
+
+Lorsqu'un remboursement est nécessaire, il doit conserver :
+
+* montant ;
+* motif ;
+* auteur ;
+* date ;
+* référence ;
+* statut.
+
+## 10.6 COD
+
+Une commande COD non encaissée ne doit pas être considérée comme un paiement à rembourser.
+
+---
+
+# 11. MOMENT DE CONSOMMATION DU STOCK
+
+## 11.1 Source
+
+La consommation doit être calculée à partir de la recette applicable.
+
+## 11.2 Moment
+
+Le moment de consommation doit être défini de façon unique et déterministe.
+
+## 11.3 Consommation unique
+
+Une transition répétée ne doit jamais consommer deux fois la même quantité.
+
+## 11.4 Annulation
+
+Une annulation après consommation applique la règle de restitution prévue.
+
+## 11.5 Modification de quantité
+
+Une modification doit appliquer uniquement la différence nécessaire.
+
+---
+
+# 12. RUPTURE DE STOCK
+
+## 12.1 Détection
+
+Le système doit détecter les quantités insuffisantes avant consommation.
+
+## 12.2 Stock négatif
+
+Une consommation ne doit jamais permettre un stock négatif lorsque la règle métier l'interdit.
+
+## 12.3 Cuisine
+
+La cuisine doit recevoir une indication claire lorsqu'une préparation est bloquée.
+
+## 12.4 Administration
+
+L'administration doit pouvoir identifier :
+
+* ingrédient ;
+* quantité disponible ;
+* quantité nécessaire ;
+* commandes concernées.
+
+## 12.5 Blocage
+
+Le comportement de la commande bloquée doit être déterministe et historisé.
+
+---
+
+# 13. COMPTES ADMINISTRATEURS
+
+## 13.1 Gestion
+
+Le Super Admin doit pouvoir :
+
+* créer ;
+* désactiver ;
+* réactiver ;
+* modifier les informations autorisées ;
+* réinitialiser un accès.
+
+## 13.2 Mot de passe
+
+Les mots de passe ne doivent jamais être stockés en clair.
+
+## 13.3 Sessions
+
+Les sessions doivent pouvoir être invalidées.
+
+## 13.4 Compte désactivé
+
+Un compte désactivé ne doit plus pouvoir effectuer d'opérations protégées.
+
+## 13.5 Audit
+
+Les opérations sensibles doivent être journalisées.
+
+---
+
+# 14. PERMISSIONS FINES
+
+Les rôles généraux doivent être complétés par des permissions précises.
+
+Les ressources concernées comprennent notamment :
+
+* commandes ;
+* clients ;
+* produits ;
+* options ;
+* ingrédients ;
+* recettes ;
+* stock ;
+* fournisseurs ;
+* livreurs ;
+* flotte ;
+* encaissements ;
+* réclamations ;
+* GPS ;
+* statistiques ;
+* utilisateurs ;
+* configuration.
+
+Chaque permission doit définir les actions possibles :
+
+* consultation ;
+* création ;
+* modification ;
+* suppression ;
+* validation ;
+* annulation ;
+* export éventuel.
+
+Les permissions doivent être vérifiées côté serveur.
+
+---
+
+# 15. NOTIFICATIONS
+
+## 15.1 Événements
+
+Les notifications peuvent être déclenchées notamment lors :
+
+* création de commande ;
+* changement de statut ;
+* commande prête ;
+* départ du livreur ;
+* livraison ;
+* encaissement ;
+* réclamation ;
+* nouveau message ;
+* résolution.
+
+## 15.2 Canaux
+
+Le système doit pouvoir distinguer :
+
+* notification interne ;
+* email ;
+* SMS ;
+* notification navigateur/mobile si disponible.
+
+## 15.3 Préférences
+
+Les préférences de notification doivent être gérées lorsque le canal le permet.
+
+## 15.4 Historique
+
+Les notifications doivent conserver leur état :
+
+* créée ;
+* envoyée ;
+* reçue si disponible ;
+* lue si disponible ;
+* échouée.
+
+---
+
+# 16. PWA
+
+## 16.1 Installation
+
+L'application doit pouvoir être installée comme application web lorsque l'environnement le permet.
+
+## 16.2 Manifest
+
+Le manifest doit définir :
+
+* nom ;
+* nom court ;
+* icônes ;
+* couleurs ;
+* orientation ;
+* URL de démarrage.
+
+## 16.3 Cache
+
+Le cache ne doit pas provoquer l'affichage de données métier périmées lorsqu'une donnée fraîche est nécessaire.
+
+## 16.4 Mise à jour
+
+Une nouvelle version doit pouvoir remplacer correctement l'ancienne.
+
+---
+
+# 17. MODE HORS LIGNE DU LIVREUR
+
+## 17.1 Détection
+
+L'interface doit détecter la perte de connexion.
+
+## 17.2 Données locales
+
+Les données nécessaires au travail courant peuvent être conservées localement selon une politique sécurisée.
+
+## 17.3 Actions hors ligne
+
+Toute action non autorisée hors ligne doit être bloquée.
+
+## 17.4 Synchronisation
+
+Lors du retour réseau :
+
+1. les actions autorisées sont synchronisées ;
+2. le serveur vérifie leur validité ;
+3. les conflits sont détectés ;
+4. les opérations déjà exécutées ne sont pas répétées.
+
+## 17.5 GPS
+
+Les positions GPS obtenues hors ligne peuvent être mises en attente de synchronisation lorsque cette fonctionnalité est activée.
+
+---
+
+# 18. ERREURS GPS
+
+Le système doit traiter explicitement :
+
+* permission refusée ;
+* permission retirée ;
+* GPS désactivé ;
+* position indisponible ;
+* précision insuffisante ;
+* timeout ;
+* navigateur incompatible ;
+* erreur système ;
+* perte temporaire du signal ;
+* perte prolongée ;
+* changement de permission.
+
+L'interface doit indiquer l'état réel.
+
+Le système ne doit jamais inventer une position.
+
+---
+
+# 19. GOOGLE MAPS — ITINÉRAIRE ET ETA
+
+L'intégration Google Maps doit permettre, selon les services réellement activés :
+
+* affichage de la position du livreur ;
+* destination ;
+* itinéraire ;
+* distance ;
+* durée estimée ;
+* recalcul ;
+* actualisation de l'ETA.
+
+## 19.1 Recalcul
+
+Le système peut recalculer lorsque :
+
+* le livreur dévie ;
+* la destination change ;
+* l'estimation devient obsolète ;
+* le service cartographique fournit une nouvelle estimation.
+
+## 19.2 Séparation
+
+Les données cartographiques doivent rester distinctes des données métier de la commande.
+
+---
+
+# 20. CONFIGURATION GOOGLE MAPS
+
+La configuration doit prévoir :
+
+* clé appropriée ;
+* restrictions ;
+* services activés ;
+* quotas ;
+* gestion des erreurs ;
+* limitation des appels ;
+* environnement développement ;
+* environnement test ;
+* environnement production.
+
+Une clé secrète destinée au backend ne doit jamais être exposée au frontend.
+
+---
+
+# 21. DÉLAI DE CRÉATION D'UNE RÉCLAMATION
+
+Le système doit définir une période pendant laquelle une réclamation peut être créée après la livraison.
+
+Cette période doit :
+
+* être configurable ;
+* être contrôlée côté serveur ;
+* être calculée à partir de la date de livraison.
+
+Une réclamation hors délai doit être refusée avec un motif explicite.
+
+---
+
+# 22. NOMBRE DE RÉCLAMATIONS PAR COMMANDE
+
+Le système doit définir le comportement concernant :
+
+* une réclamation unique ;
+* plusieurs réclamations ;
+* réclamation globale ;
+* réclamation par article.
+
+Chaque réclamation doit avoir :
+
+* identifiant ;
+* statut ;
+* historique ;
+* chat associé lorsque prévu.
+
+Une réclamation ne doit pas écraser une autre.
+
+---
+
+# 23. PIÈCES JOINTES DU CHAT
+
+Les messages d'une réclamation peuvent comporter des pièces jointes selon les types autorisés.
+
+Le système doit contrôler :
+
+* type ;
+* taille ;
+* nombre ;
+* nom ;
+* stockage ;
+* accès ;
+* suppression.
+
+Les fichiers ne doivent pas être publiquement accessibles sans autorisation.
+
+---
+
+# 24. LU / NON LU DU CHAT
+
+Chaque participant doit disposer d'un état de lecture.
+
+Le système distingue :
+
+* envoyé ;
+* reçu ;
+* lu.
+
+L'administration doit pouvoir identifier les réclamations comportant de nouveaux messages.
+
+Le client doit pouvoir identifier les réponses administratives non lues.
+
+---
+
+# 25. RÉOUVERTURE D'UNE RÉCLAMATION
+
+Le système doit définir les conditions permettant la réouverture d'une réclamation clôturée.
+
+Une réouverture doit :
+
+* conserver l'historique ;
+* créer un événement d'historique ;
+* réactiver le chat ;
+* notifier les participants.
+
+L'ancien historique ne doit jamais être supprimé.
+
+---
+
+# 26. CONSERVATION ET ARCHIVAGE DES DONNÉES
+
+La politique doit couvrir :
+
+* commandes ;
+* clients ;
+* adresses ;
+* encaissements ;
+* réclamations ;
+* messages ;
+* photos ;
+* GPS ;
+* audit ;
+* notifications ;
+* stock.
+
+## 26.1 Archivage
+
+Les données anciennes peuvent être archivées.
+
+## 26.2 Suppression
+
+Une suppression doit respecter :
+
+* obligations légales ;
+* contraintes comptables ;
+* audit ;
+* relations entre données.
+
+## 26.3 Historique
+
+Une suppression logique doit être privilégiée lorsque l'historique doit être conservé.
+
+---
+
+# 27. DONNÉES PERSONNELLES / RGPD
+
+Le système doit prévoir :
+
+* finalité de collecte ;
+* minimisation ;
+* accès ;
+* modification ;
+* suppression lorsque possible ;
+* conservation ;
+* sécurité ;
+* traçabilité ;
+* consentements lorsque nécessaires ;
+* politique de confidentialité.
+
+Les données inutiles au fonctionnement de BEBBA ne doivent pas être collectées.
+
+## 27.1 GPS
+
+La localisation du livreur doit être utilisée uniquement dans le cadre prévu.
+
+## 27.2 Photos
+
+Les photos des réclamations doivent être protégées et conservées selon la politique définie.
+
+---
+
+# 28. ENVIRONNEMENTS ET DÉPLOIEMENT
+
+Les environnements doivent être séparés au minimum en :
+
+* développement ;
+* test ;
+* production.
+
+## 28.1 Configuration
+
+Les variables spécifiques à chaque environnement ne doivent pas être codées en dur.
+
+## 28.2 Déploiement
+
+La procédure doit couvrir :
+
+1. préparation ;
+2. validation ;
+3. sauvegarde ;
+4. déploiement ;
+5. migration éventuelle ;
+6. vérification ;
+7. validation ;
+8. rollback si nécessaire.
+
+## 28.3 Rollback
+
+Une procédure de rollback doit être définie pour :
+
+* frontend ;
+* backend ;
+* base de données lorsque techniquement possible.
+
+---
+
+# 29. CI/CD
+
+Le pipeline doit pouvoir exécuter automatiquement les contrôles nécessaires.
+
+Au minimum :
+
+* installation ;
+* vérification TypeScript ;
+* lint ;
+* tests ;
+* build ;
+* contrôles de sécurité prévus ;
+* contrôle des migrations si nécessaire.
+
+Un build réussi ne constitue pas à lui seul une preuve de fonctionnement métier.
+
+---
+
+# 30. MONITORING ET OBSERVABILITÉ
+
+Le système doit permettre de détecter :
+
+* erreurs frontend ;
+* erreurs backend ;
+* erreurs API ;
+* erreurs base de données ;
+* erreurs synchronisation ;
+* erreurs GPS ;
+* erreurs Google Maps ;
+* erreurs notifications ;
+* erreurs upload ;
+* problèmes de performance.
+
+Les erreurs doivent permettre d'identifier :
+
+* date ;
+* environnement ;
+* composant ;
+* erreur ;
+* contexte technique utile.
+
+---
+
+# 31. GESTION DES LOGS
+
+Les logs doivent être structurés.
+
+Ils doivent permettre de retrouver une opération à partir d'un identifiant technique approprié.
+
+Les logs ne doivent pas exposer inutilement :
+
+* mots de passe ;
+* tokens secrets ;
+* données sensibles ;
+* clés API ;
+* informations personnelles non nécessaires.
+
+Une politique de conservation des logs doit être définie.
+
+---
+
+# 32. RATE LIMITING
+
+Les endpoints sensibles doivent être protégés contre les abus.
+
+Cela concerne notamment :
+
+* connexion ;
+* récupération de compte ;
+* création de commande ;
+* réclamation ;
+* upload ;
+* messages ;
+* GPS ;
+* API publiques.
+
+Le système doit pouvoir limiter :
+
+* fréquence ;
+* nombre de requêtes ;
+* taille ;
+* tentatives.
+
+---
+
+# 33. MATRICE EXHAUSTIVE DES TESTS
+
+La validation finale doit inclure des tests :
+
+* fonctionnels ;
+* techniques ;
+* sécurité ;
+* permissions ;
+* non-régression.
+
+## 33.1 Comptes
+
+Tester :
+
+* inscription valide ;
+* téléphone invalide ;
+* téléphone déjà existant ;
+* téléphone avec espaces ;
+* téléphone avec `+` ;
+* téléphone avec séparateurs ;
+* normalisation ;
+* connexion ;
+* déconnexion ;
+* session expirée ;
+* compte désactivé.
+
+## 33.2 Commandes
+
+Tester :
+
+* commande normale ;
+* panier vide ;
+* quantité zéro ;
+* quantité négative ;
+* quantité excessive ;
+* produit indisponible ;
+* option indisponible ;
+* prix modifié ;
+* promotion expirée ;
+* promotion invalide ;
+* adresse incomplète ;
+* frais incorrects ;
+* double clic ;
+* double soumission ;
+* perte réseau ;
+* retour réseau.
+
+## 33.3 Stock
+
+Tester :
+
+* stock suffisant ;
+* stock exactement suffisant ;
+* stock insuffisant ;
+* stock nul ;
+* stock négatif ;
+* consommation unique ;
+* double transition ;
+* annulation ;
+* restitution ;
+* modification de quantité ;
+* concurrence entre commandes.
+
+## 33.4 Cuisine
+
+Tester :
+
+* réception ;
+* préparation ;
+* prêt ;
+* annulation ;
+* blocage stock ;
+* double validation ;
+* accès interdit ;
+* modification interdite.
+
+## 33.5 Livreur
+
+Tester :
+
+* affectation ;
+* réaffectation ;
+* livreur désactivé ;
+* commande d'un autre livreur ;
+* accès direct par identifiant ;
+* livraison ;
+* livraison sans encaissement ;
+* encaissement ;
+* encaissement partiel ;
+* montant supérieur ;
+* correction ;
+* perte réseau ;
+* reconnexion.
+
+## 33.6 GPS
+
+Tester :
+
+* permission acceptée ;
+* permission refusée ;
+* GPS désactivé ;
+* position indisponible ;
+* précision faible ;
+* timeout ;
+* perte réseau ;
+* retour réseau ;
+* changement de permission ;
+* fermeture application ;
+* reprise.
+
+## 33.7 Google Maps
+
+Tester :
+
+* clé valide ;
+* clé invalide ;
+* quota ;
+* service indisponible ;
+* destination valide ;
+* destination invalide ;
+* recalcul ;
+* ETA indisponible ;
+* carte non chargée.
+
+## 33.8 Réclamation
+
+Tester :
+
+* création autorisée ;
+* création hors délai ;
+* commande inexistante ;
+* commande d'un autre client ;
+* réclamation existante ;
+* photo valide ;
+* photo trop grande ;
+* type interdit ;
+* plusieurs photos ;
+* suppression ;
+* message client ;
+* réponse admin ;
+* non lu ;
+* lu ;
+* clôture ;
+* réouverture.
+
+## 33.9 Sécurité réclamation
+
+Tester :
+
+* client accédant à la réclamation d'un autre ;
+* client accédant à une photo étrangère ;
+* accès livreur ;
+* accès cuisine ;
+* accès admin ;
+* URL directe ;
+* identifiant deviné ;
+* téléchargement non autorisé.
+
+## 33.10 Encaissement
+
+Tester :
+
+* `to_collect` ;
+* `paid` ;
+* livraison sans paiement ;
+* paiement exact ;
+* paiement supérieur ;
+* paiement insuffisant ;
+* correction ;
+* double validation ;
+* accès client ;
+* accès livreur ;
+* accès admin.
+
+## 33.11 Administration
+
+Tester :
+
+* accès Super Admin ;
+* compte désactivé ;
+* permission insuffisante ;
+* modification interdite ;
+* suppression interdite ;
+* audit log ;
+* action sensible.
+
+## 33.12 API
+
+Tester :
+
+* requête valide ;
+* requête invalide ;
+* authentification absente ;
+* token expiré ;
+* mauvais rôle ;
+* ressource inexistante ;
+* doublon ;
+* concurrence ;
+* timeout ;
+* erreur serveur ;
+* réponse partielle.
+
+## 33.13 Données
+
+Tester :
+
+* suppression logique ;
+* archivage ;
+* restauration lorsque prévue ;
+* intégrité ;
+* sauvegarde ;
+* restauration ;
+* migration.
+
+## 33.14 Non-régression
+
+Toute correction doit être suivie d'une vérification des fonctionnalités déjà validées.
+
+---
+
+# 34. CRITÈRE DE COMPLÉTUDE
+
+Le présent document est considéré comme traité lorsque les éléments concernés disposent d'une spécification explicite concernant :
+
+* règle métier ;
+* données ;
+* comportement normal ;
+* comportement en erreur ;
+* permissions ;
+* sécurité ;
+* persistance ;
+* historique lorsque nécessaire ;
+* tests ;
+* critères de validation.
+
+Une fonctionnalité ne doit pas être considérée comme terminée uniquement parce que :
+
+* l'interface existe ;
+* l'API répond ;
+* le build réussit ;
+* le code compile ;
+* un bouton fonctionne.
+
+---
+
+# 35. RÈGLE DE VALIDATION DU PROJET
+
+Pour chaque fonctionnalité :
+
+**BLOC → AUDIT → PREUVE → VALIDATION → BLOC SUIVANT**
+
+L'état réel doit être vérifié.
+
+Une déclaration d'un outil de développement indiquant :
+
+* « Done » ;
+* « Fixed » ;
+* « Complete » ;
+
+ne constitue pas à elle seule une preuve.
+
+---
+
+# 36. RELATION AVEC LES DEUX PREMIERS CAHIERS
+
+Le présent document doit être lu conjointement avec :
+
+**Cahier des charges n°1 — BEBBA Healthy Food**
+
+et
+
+**Cahier des charges n°2 — Cahier des charges technique complémentaire.**
+
+En cas de fonctionnalité déjà définie dans les deux premiers documents, leurs spécifications restent applicables.
+
+Le présent document ajoute uniquement les compléments identifiés comme nécessaires.
+
+---
+
+# 37. LIVRABLE FINAL ATTENDU
+
+Le projet complet doit disposer d'un ensemble cohérent comprenant notamment :
+
+1. cahier des charges initial ;
+2. cahier des charges complémentaire ;
+3. présent cahier « À compléter » ;
+4. architecture technique ;
+5. schéma de données ;
+6. API documentée ;
+7. authentification ;
+8. RBAC ;
+9. interfaces Client ;
+10. interfaces Cuisine ;
+11. interfaces Livreur ;
+12. Administration ;
+13. Super Admin ;
+14. commandes ;
+15. KDS ;
+16. produits ;
+17. options ;
+18. ingrédients ;
+19. recettes ;
+20. stock ;
+21. fournisseurs ;
+22. livreurs ;
+23. flotte ;
+24. livraison ;
+25. encaissement COD ;
+26. suivi ;
+27. GPS ;
+28. Google Maps ;
+29. réclamations ;
+30. photos ;
+31. chat des réclamations ;
+32. notifications ;
+33. statistiques ;
+34. audit ;
+35. sauvegardes ;
+36. sécurité ;
+37. tests ;
+38. déploiement ;
+39. documentation.
+
+---
+
+# FIN DU CAHIER DES CHARGES « À COMPLÉTER »
+
+Ce troisième cahier constitue un complément aux deux cahiers précédents et ne les remplace pas.
+
+**BEBBA Healthy Food**
+
+**« Vos Plats santé en un clic »**
